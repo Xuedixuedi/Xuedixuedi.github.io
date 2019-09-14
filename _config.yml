@@ -1,16 +1,16 @@
 # Site settings
-title: A blog about lorem ipsum dolor sit amet
-description: A blog about lorem ipsum dolor sit amet
+title: lxd's blog | 没有什么东西
+description: 里面什么也没有，你可以出去了
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://xuedixuedi.github.io" # the base hostname & protocol for your site e.g. http://willianjusten.com.br
 
 # User settings
-username: Lorem Ipsum
+username: Liu Xuedi
 user_description: Anon Developer at Lorem Ipsum Dolor
-user_title: Anon Developer
-email: anon@anon.com
+user_title: 琉 雪蒂
+email: liuxuedi1999@126.com
 twitter_username: lorem_ipsum
-github_username: lorem_ipsum
+github_username: Xuedixuedi
 gplus_username: lorem_ipsum
 disqus_username: lorem_ipsum
 
