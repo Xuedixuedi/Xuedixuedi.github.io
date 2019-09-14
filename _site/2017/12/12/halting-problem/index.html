@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="关于程序与设计、黑客与画家 | 黄玄，Web & Mobile Lover，Software Engineer，UX Designer | 这里是 @Hux黄玄 的个人博客，与你一起发现更大的世界。">
+    <meta name="keywords"  content="黄玄, Hux黄玄, Hux, 鬼栈, huxpro, @huxpro, 黄玄的博客, Hux Blog, 博客, 个人网站, 互联网, Web, JavaScript, 前端, 设计">
+    <meta name="theme-color" content="#000000">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="「知乎」如何通俗地解释停机问题？ - lxd的博客 | lxd Blog">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:description" content="
+  这篇文章转载自我在知乎上的回答
+
+
+">
+    
+    <meta property="article:published_time" content="2017-12-12T00:00:00Z">
+    
+    
+    <meta property="article:author" content="Hux">
+    
+    
+    <meta property="article:tag" content="知乎">
+    
+    <meta property="article:tag" content="计算机科学">
+    
+    <meta property="article:tag" content="计算理论">
+    
+    
+    <meta property="og:image" content="http://localhost:4000/img/avatar-hux-ny.jpg">
+    <meta property="og:url" content="http://localhost:4000/2017/12/12/halting-problem/">
+    <meta property="og:site_name" content="lxd的博客 | lxd Blog">
+    
+    <title>「知乎」如何通俗地解释停机问题？ - lxd的博客 | lxd Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2017/12/12/halting-problem/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">lxd's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    
+                    
+                    <li>
+                        <a href="/archive/">Archive</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-halting.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+
+
+
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-halting.jpg');
+        background: ;
+    }
+
+    
+    header.intro-header .header-mask{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: rgba(0,0,0, 0.3);
+    }
+    
+</style>
+
+<header class="intro-header" >
+
+    <div class="header-mask"></div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/archive/?tag=%E7%9F%A5%E4%B9%8E" title="知乎">知乎</a>
+                        
+                        <a class="tag" href="/archive/?tag=%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6" title="计算机科学">计算机科学</a>
+                        
+                        <a class="tag" href="/archive/?tag=%E8%AE%A1%E7%AE%97%E7%90%86%E8%AE%BA" title="计算理论">计算理论</a>
+                        
+                    </div>
+                    <h1>「知乎」如何通俗地解释停机问题？</h1>
+                    
+                    <h2 class="subheading">How to explain the Halting Problem?</h2>
+                    <span class="meta">Posted by Hux on December 12, 2017</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <!-- Multi-Lingual -->
+                
+
+				<blockquote>
+  <p>这篇文章转载自<a href="https://www.zhihu.com/question/20081359/answer/275107187">我在知乎上的回答</a></p>
+</blockquote>
+
+<p>我用 Python 伪代码来解释下，我觉得对这个问题有兴趣的应该都是有点编程基础的，所以直接上 code 应该是最容易的。</p>
+
+<h2 id="背景知识">背景知识</h2>
+
+<p>「停机问题」研究的是：是否存在一个「程序」，能够判断另外一个「程序」在特定的「输入」下，是会给出结果（停机），还是会无限执行下去（不停机）。</p>
+
+<p>在下文中，我们用「函数」来表示「程序」，「函数返回」即表示给出了结果。</p>
+
+<h2 id="正文">正文</h2>
+
+<p>我们假设存在这么一个「停机程序」，不管它是怎么实现的，但是它能够回答「停机问题」：它接受一个「程序」和一个「输入」，然后判断这个「程序」在这个「输入」下是否能给出结果：</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">is_halt</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="c"># 返回 True  如果 program(input) 会返回</span>
+  <span class="c"># 返回 False 如果 program(input) 不返回</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>（在这里，我们通过把一个函数作为另一个函数的输入来描述一个「程序」作为另一个「程序」的「输入」，如果你不熟悉「头等函数」的概念，你可以把所有文中的函数对应为一个具备该函数的对象。）</p>
+
+<p>为了帮助大家理解这个「停机程序」的功能，我们举个使用它的例子：</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="rouge-code"><pre><span class="kn">from</span> <span class="nn">halt</span> <span class="kn">import</span> <span class="n">is_halt</span>
+
+<span class="k">def</span> <span class="nf">loop</span><span class="p">():</span>
+  <span class="k">while</span><span class="p">(</span><span class="bp">True</span><span class="p">):</span>
+      <span class="k">pass</span>
+
+<span class="c"># 如果输入是 0，返回，否则无限循环</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">input</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">return</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">loop</span><span class="p">()</span>
+
+<span class="n">is_halt</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c"># 返回 True</span>
+<span class="n">is_halt</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c"># 返回 False</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>是不是很棒？</p>
+
+<p>不过，如果这个「停机程序」真的存在，那么我就可以写出这么一个「hack 程序」：</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="kn">from</span> <span class="nn">halt</span> <span class="kn">import</span> <span class="n">is_halt</span>
+
+<span class="k">def</span> <span class="nf">loop</span><span class="p">():</span>
+  <span class="k">while</span><span class="p">(</span><span class="bp">True</span><span class="p">):</span>
+      <span class="k">pass</span>
+
+<span class="k">def</span> <span class="nf">hack</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">is_halt</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+    <span class="n">loop</span><span class="p">()</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这个程序说，如果你 <code class="highlighter-rouge">is_halt</code> 对 <code class="highlighter-rouge">program(program)</code> 判停了，我就无限循环；如果你判它不停，我就立刻返回。</p>
+
+<p>那么，如果我们把「hack 程序」同时当做「程序」和「输入」喂给「停机程序」，会怎么样呢？</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">is_halt</span><span class="p">(</span><span class="n">hack</span><span class="p">,</span> <span class="n">hack</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>你会发现，如果「停机程序」认为 <code class="highlighter-rouge">hack(hack)</code> 会给出结果，即 <code class="highlighter-rouge">is_halt(hack, hack)</code>) 返回 <code class="highlighter-rouge">True</code>) ，那么实际上 <code class="highlighter-rouge">hack(hack)</code> 会进入无限循环。而如果「停机程序」认为 <code class="highlighter-rouge">hack(hack)</code> 不会给出结果，即 <code class="highlighter-rouge">is_halt(hack, hack)</code> 返回 ，那么实际上 <code class="highlighter-rouge">hack(hack)</code> 会立刻返回结果……</p>
+
+<p>这里就出现了矛盾和悖论，所以我们只能认为，我们最开始的假设是错的：</p>
+
+<p><strong>这个「停机程序」是不存在的。</strong></p>
+
+<h2 id="意义">意义</h2>
+
+<p>简单的说，「停机问题」说明了现代计算机并不是无所不能的。</p>
+
+<p>上面的例子看上去是刻意使用「自我指涉」来进行反证的，但这只是为了证明方便。实际上，现实中与「停机问题」一样是现代计算机「不可解」的问题还有很多，比如所有「判断一个程序是否会在某输入下怎么样？」的算法、Hilbert 第十问题等等，wikipedia 甚至有一个 <a href="https://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/List_of_undecidable_problems">List of undecidable problems</a>。</p>
+
+<h2 id="漫谈">漫谈</h2>
+
+<p>如果你觉得只是看懂了这个反证法没什么意思：</p>
+
+<ol>
+  <li>最初图灵提出「停机问题」只是针对「图灵机」本身的，但是其意义可以被推广到所有「算法」、「程序」、「现代计算机」甚至是「量子计算机」。</li>
+  <li>实际上「图灵机」只能接受（纸带上的）字符串，所以在图灵机编程中，无论是「输入」还是另一个「图灵机」，都是通过编码来表示的。</li>
+  <li>「图灵机的计算能力和现代计算机是等价的」，更严谨一些，由于图灵机作为一个假象的计算模型，其储存空间是无限大的，而真实计算机则有硬件限制，所以我们只能说「不存在比图灵机计算能力更强的真实计算机」。</li>
+  <li>这里的「计算能力」（power）指的是「能够计算怎样的问题」（capablity）而非「计算效率」（efficiency），比如我们说「上下文无关文法」比「正则表达式」的「计算能力」强因为它能解决更多的计算问题。</li>
+  <li>「图灵机」作为一种计算模型形式化了「什么是算法」这个问题（<a href="https://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/Church%25E2%2580%2593Turing_thesis">邱奇－图灵论题</a>）。但图灵机并不是唯一的计算模型，其他计算模型包括「<a href="https://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/Lambda_calculus">Lambda 算子</a>」、<a href="https://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/%25CE%259C-recursive_function">μ-递归函数</a>」等，它们在计算能力上都是与「图灵机」等价的。因此，我们可以用「图灵机」来证明「<a href="https://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/Computable_function">可计算函数</a>」的上界。也因此可以证明哪些计算问题是超出上界的（即不可解的）。</li>
+  <li>需要知道的是，只有「可计算的」才叫做「算法」。</li>
+  <li>「停机问题」响应了「哥德尔的不完备性定理」。</li>
+</ol>
+
+<h2 id="拓展阅读">拓展阅读：</h2>
+
+<p>中文：</p>
+
+<ul>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=http%3A//www.matrix67.com/blog/archives/55">Matrix67: 不可解问题(Undecidable Decision Problem)</a></p>
+  </li>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=http%3A//www.matrix67.com/blog/archives/901">Matrix67: 停机问题、Chaitin 常数与万能证明方法</a></p>
+  </li>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=http%3A//blog.csdn.net/pongba/article/details/1336028">刘未鹏：康托尔、哥德尔、图灵–永恒的金色对角线(rev#2) - CSDN 博客</a></p>
+  </li>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=http%3A//www.changhai.org/articles/science/mathematics/hilbert10/1.php">卢昌海：Hilbert 第十问题漫谈 (上)</a></p>
+  </li>
+</ul>
+
+<p>英文：</p>
+
+<ul>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/Introduction_to_the_Theory_of_Computation">《Introduction to the Theory of Computation》</a></p>
+  </li>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=https%3A//www.youtube.com/watch%3Fv%3DdNRDvLACg5Q">Turing Machines Explained - Computerphile</a></p>
+  </li>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=https%3A//www.youtube.com/watch%3Fv%3DmacM_MtS_w4%26t%3D29s">Turing &amp; The Halting Problem - Computerphile</a></p>
+  </li>
+  <li>
+    <p><a href="https://link.zhihu.com/?target=https%3A//cs.stackexchange.com/questions/32845/why-really-is-the-halting-problem-so-important">Why, really, is the Halting Problem so important?</a></p>
+  </li>
+</ul>
+
+
+                <hr style="visibility: hidden;">
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2017/10/06/css-complaints/" data-toggle="tooltip" data-placement="top" title="「知乎」为什么 CSS 这么难学？">
+                        Previous<br>
+                        <span>「知乎」为什么 CSS 这么难学？</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/12/12/uncomputable-funcs/" data-toggle="tooltip" data-placement="top" title="「知乎」如何证明不可计算的函数比可计算的函数多？">
+                        Next<br>
+                        <span>「知乎」如何证明不可计算的函数比可计算的函数多？</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <hr style="visibility: hidden;">
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+                
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+
+<section>
+    
+        <hr class="hidden-sm hidden-xs">
+    
+    <h5><a href="/archive/">FEATURED TAGS</a></h5>
+    <div class="tags">
+        
+        
+        
+        </a>
+        
+        
+                <a data-sort="0065" 
+                    href="/archive/?tag=%E7%9F%A5%E4%B9%8E"
+                    title="知乎"
+                    rel="10">知乎</a>
+        
+                <a data-sort="0036" 
+                    href="/archive/?tag=%E7%AC%94%E8%AE%B0"
+                    title="笔记"
+                    rel="39">笔记</a>
+        
+                <a data-sort="0039" 
+                    href="/archive/?tag=Coq"
+                    title="Coq"
+                    rel="36">Coq</a>
+        
+                <a data-sort="0039" 
+                    href="/archive/?tag=SF+%28%E8%BD%AF%E4%BB%B6%E5%9F%BA%E7%A1%80%29"
+                    title="SF (软件基础)"
+                    rel="36">SF (软件基础)</a>
+        
+                <a data-sort="0056" 
+                    href="/archive/?tag=PLF+%28%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%29"
+                    title="PLF (编程语言基础)"
+                    rel="19">PLF (编程语言基础)</a>
+        
+                <a data-sort="0056" 
+                    href="/archive/?tag=Web"
+                    title="Web"
+                    rel="19">Web</a>
+        
+                <a data-sort="0059" 
+                    href="/archive/?tag=LF+%28%E9%80%BB%E8%BE%91%E5%9F%BA%E7%A1%80%29"
+                    title="LF (逻辑基础)"
+                    rel="16">LF (逻辑基础)</a>
+        
+                <a data-sort="0068" 
+                    href="/archive/?tag=UX%2FUI"
+                    title="UX/UI"
+                    rel="7">UX/UI</a>
+        
+                <a data-sort="0069" 
+                    href="/archive/?tag=%E4%BA%A7%E5%93%81"
+                    title="产品"
+                    rel="6">产品</a>
+        
+                <a data-sort="0069" 
+                    href="/archive/?tag=PWA"
+                    title="PWA"
+                    rel="6">PWA</a>
+        
+                <a data-sort="0071" 
+                    href="/archive/?tag=JavaScript"
+                    title="JavaScript"
+                    rel="4">JavaScript</a>
+        
+                <a data-sort="0071" 
+                    href="/archive/?tag=Slides"
+                    title="Slides"
+                    rel="4">Slides</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%E7%94%9F%E6%B4%BB"
+                    title="生活"
+                    rel="3">生活</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%E8%AF%91"
+                    title="译"
+                    rel="3">译</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%E9%98%BF%E9%87%8C"
+                    title="阿里"
+                    rel="3">阿里</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%F0%9F%87%AC%F0%9F%87%A7"
+                    title="🇬🇧"
+                    rel="3">🇬🇧</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=Vim"
+                    title="Vim"
+                    rel="3">Vim</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6"
+                    title="计算机科学"
+                    rel="2">计算机科学</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=%E8%AE%A1%E7%AE%97%E7%90%86%E8%AE%BA"
+                    title="计算理论"
+                    rel="2">计算理论</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=CSS"
+                    title="CSS"
+                    rel="2">CSS</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=Wechat"
+                    title="Wechat"
+                    rel="2">Wechat</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=hUX+%E9%9A%8F%E6%83%B3%E5%BD%95"
+                    title="hUX 随想录"
+                    rel="2">hUX 随想录
+    </div>
+</section>
+
+
+                <!-- Friends Blog -->
+                
+<hr>
+<h5>FRIENDS</h5>
+<ul class="list-inline">
+  
+  <li><a href="http://mida.re/">乱序</a></li>
+  
+  <li><a href="http://qianduan.guru/">前端外刊评论</a></li>
+  
+  <li><a href="http://lingyu.wang/">天镶的博客</a></li>
+  
+  <li><a href="http://hmqk1995.github.io">Luke 的自留地</a></li>
+  
+  <li><a href="http://ebnbin.com/">Ebn's Blog</a></li>
+  
+  <li><a href="http://blog.smdcn.net">SmdCn's Blog</a></li>
+  
+  <li><a href="https://www.ruoyaowu.com/">David's Game</a></li>
+  
+  <li><a href="http://dhong.co">DHong Say</a></li>
+  
+  <li><a href="http://ingf.github.io/">尹峰以为</a></li>
+  
+  <li><a href="http://xieminis.me/">解旻的博客</a></li>
+  
+</ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<!-- add support for mathjax by voleking-->
+
+
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "hux";
+    var disqus_identifier = "/2017/12/12/halting-problem";
+    var disqus_url = "http://localhost:4000/2017/12/12/halting-problem/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'right',
+          // icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <!-- SNS Link -->
+                
+
+
+<ul class="list-inline text-center">
+
+
+  
+  
+  <li>
+    <a href="https://twitter.com/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  
+  <li>
+    <a target="_blank" href="https://www.zhihu.com/people/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa  fa-stack-1x fa-inverse">知</i>
+      </span>
+    </a>
+  </li>
+  
+  
+  <li>
+    <a target="_blank" href="http://weibo.com/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  
+  
+  <li>
+    <a target="_blank" href="https://github.com/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  
+</ul>
+
+                <p class="copyright text-muted">
+                    Copyright &copy; lxd's Blog 2019
+                    <br>
+                    Powered by <a href="http://huangxuan.me">Hux Blog</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<!-- Currently, only navbar scroll-down effect at desktop still depends on this -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script src="/js/snackbar.js "></script>
+<script src="/js/sw-registration.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!--
+     Because of the native support for backtick-style fenced code blocks
+     right within the Markdown is landed in Github Pages,
+     From V1.6, There is no need for Highlight.js,
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+
+
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+<!-- Side Catalog -->
+
+
+
+<!-- Multi-Lingual -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

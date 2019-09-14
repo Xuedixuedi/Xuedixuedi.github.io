@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="关于程序与设计、黑客与画家 | 黄玄，Web & Mobile Lover，Software Engineer，UX Designer | 这里是 @Hux黄玄 的个人博客，与你一起发现更大的世界。">
+    <meta name="keywords"  content="黄玄, Hux黄玄, Hux, 鬼栈, huxpro, @huxpro, 黄玄的博客, Hux Blog, 博客, 个人网站, 互联网, Web, JavaScript, 前端, 设计">
+    <meta name="theme-color" content="#000000">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="「SF-PLF」11. TypeChecking - lxd的博客 | lxd Blog">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:description" content="
+  The has_type relation is good but doesn’t give us a executable algorithm – 不是一个算法
+but it’s syntax directed, just one typing rule for one term (unique typing) – translate into function!
+
+
+">
+    
+    <meta property="article:published_time" content="2019-03-11T00:00:00Z">
+    
+    
+    <meta property="article:author" content="Hux">
+    
+    
+    <meta property="article:tag" content="SF (软件基础)">
+    
+    <meta property="article:tag" content="PLF (编程语言基础)">
+    
+    <meta property="article:tag" content="Coq">
+    
+    <meta property="article:tag" content="笔记">
+    
+    
+    <meta property="og:image" content="http://localhost:4000/img/avatar-hux-ny.jpg">
+    <meta property="og:url" content="http://localhost:4000/2019/03/11/sf-plf-11-typechecking/">
+    <meta property="og:site_name" content="lxd的博客 | lxd Blog">
+    
+    <title>「SF-PLF」11. TypeChecking - lxd的博客 | lxd Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2019/03/11/sf-plf-11-typechecking/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top invert">
+
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">lxd's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    
+                    
+                    <li>
+                        <a href="/archive/">Archive</a>
+                    </li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/home-bg.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+
+
+
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/home-bg.jpg');
+        background: ;
+    }
+
+    
+</style>
+
+<header class="intro-header style-text" >
+
+    <div class="header-mask"></div>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/archive/?tag=SF+%28%E8%BD%AF%E4%BB%B6%E5%9F%BA%E7%A1%80%29" title="SF (软件基础)">SF (软件基础)</a>
+                        
+                        <a class="tag" href="/archive/?tag=PLF+%28%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%29" title="PLF (编程语言基础)">PLF (编程语言基础)</a>
+                        
+                        <a class="tag" href="/archive/?tag=Coq" title="Coq">Coq</a>
+                        
+                        <a class="tag" href="/archive/?tag=%E7%AC%94%E8%AE%B0" title="笔记">笔记</a>
+                        
+                    </div>
+                    <h1>「SF-PLF」11. TypeChecking</h1>
+                    
+                    <h2 class="subheading">Programming Language Foundations - A Typechecker for STLC</h2>
+                    <span class="meta">Posted by Hux on March 11, 2019</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <!-- Multi-Lingual -->
+                
+
+				<blockquote>
+  <p>The <code class="highlighter-rouge">has_type</code> relation is good but doesn’t give us a <em>executable algorithm</em> – 不是一个算法
+but it’s <em>syntax directed</em>, just one typing rule for one term (unique typing) – translate into function!</p>
+</blockquote>
+
+<h2 id="comparing-types">Comparing Types</h2>
+
+<p>首先我们需要 check equality for types.
+这里非常简单，如果是 SystemF 会麻烦很多，对 <code class="highlighter-rouge">∀</code> 要做 local nameless 或者 alpha renaming:</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="k">Fixpoint</span><span class="w"> </span><span class="no">eqb_ty</span><span class="w"> </span><span class="o">(</span><span class="no">T1</span><span class="w"> </span><span class="no">T2</span><span class="p">:</span><span class="no">ty</span><span class="o">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">bool</span><span class="w"> </span><span class="p">:=</span><span class="w">
+  </span><span class="kr">match</span><span class="w"> </span><span class="no">T1</span><span class="o">,</span><span class="no">T2</span><span class="w"> </span><span class="kp">with</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">Bool</span><span class="o">,</span><span class="w"> </span><span class="no">Bool</span><span class="w"> </span><span class="err">⇒</span><span class="w">
+      </span><span class="no">true</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">Arrow</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T12</span><span class="o">,</span><span class="w"> </span><span class="no">Arrow</span><span class="w"> </span><span class="no">T21</span><span class="w"> </span><span class="no">T22</span><span class="w"> </span><span class="err">⇒</span><span class="w">
+      </span><span class="no">andb</span><span class="w"> </span><span class="o">(</span><span class="no">eqb_ty</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T21</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="no">eqb_ty</span><span class="w"> </span><span class="no">T12</span><span class="w"> </span><span class="no">T22</span><span class="o">)</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="o">_,_</span><span class="w"> </span><span class="err">⇒</span><span class="w">
+      </span><span class="no">false</span><span class="w">
+  </span><span class="kr">end</span><span class="pi">.</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>然后我们需要一个 refl 和一个 reflection，准确得说：「define equality by computation」，反方向用 refl 即可易证</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="k">Lemma</span><span class="w"> </span><span class="no">eqb_ty_refl</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="err">∀</span><span class="no">T1</span><span class="o">,</span><span class="w">
+  </span><span class="no">eqb_ty</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span><span class="pi">.</span><span class="w">
+
+</span><span class="k">Lemma</span><span class="w"> </span><span class="no">eqb_ty__eq</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="err">∀</span><span class="no">T1</span><span class="w"> </span><span class="no">T2</span><span class="o">,</span><span class="w">
+  </span><span class="no">eqb_ty</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="no">T2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">T2</span><span class="pi">.</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="the-typechecker">The Typechecker</h2>
+
+<p>直接 syntax directed，不过麻烦的是需要 pattern matching <code class="highlighter-rouge">option</code>…</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre><span class="k">Fixpoint</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="o">(</span><span class="no">Gamma</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">context</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="no">t</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">tm</span><span class="o">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">option</span><span class="w"> </span><span class="no">ty</span><span class="w"> </span><span class="p">:=</span><span class="w">
+  </span><span class="kr">match</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="kp">with</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">var</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="p">=&gt;</span><span class="w">
+      </span><span class="no">Gamma</span><span class="w"> </span><span class="no">x</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">abs</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">t12</span><span class="w"> </span><span class="p">=&gt;</span><span class="w">
+      </span><span class="kr">match</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="o">(</span><span class="no">update</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="no">T11</span><span class="o">)</span><span class="w"> </span><span class="no">t12</span><span class="w"> </span><span class="kp">with</span><span class="w">     </span><span class="c">(** &lt;-- 对应 t12 的 rule **)</span><span class="w">
+      </span><span class="o">|</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">T12</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="o">(</span><span class="no">Arrow</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T12</span><span class="o">)</span><span class="w">                 
+      </span><span class="o">|</span><span class="w"> </span><span class="p">_</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">None</span><span class="w">
+      </span><span class="kr">end</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">app</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="no">t2</span><span class="w"> </span><span class="p">=&gt;</span><span class="w">
+      </span><span class="kr">match</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t1</span><span class="o">,</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t2</span><span class="w"> </span><span class="kp">with</span><span class="w">
+      </span><span class="o">|</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="o">(</span><span class="no">Arrow</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T12</span><span class="o">),</span><span class="no">Some</span><span class="w"> </span><span class="no">T2</span><span class="w"> </span><span class="p">=&gt;</span><span class="w">
+          </span><span class="kr">if</span><span class="w"> </span><span class="no">eqb_ty</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T2</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">T12</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="no">None</span><span class="w">       </span><span class="c">(** eqb_ty 见下文 **)</span><span class="w">
+      </span><span class="o">|</span><span class="w"> </span><span class="o">_,_</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">None</span><span class="w">
+      </span><span class="kr">end</span><span class="w">
+  </span><span class="o">...</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>在课堂时提到关于 <code class="highlighter-rouge">eqb_ty</code> 的一个细节（我以前也经常犯，在 ML/Haskell 中……）：
+我们能不能在 pattern matching 里支持「用同一个 binding 来 imply 说他们两需要 be equal」？</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="c">(** instead of this **)</span><span class="w">
+</span><span class="o">|</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="o">(</span><span class="no">Arrow</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T12</span><span class="o">),</span><span class="no">Some</span><span class="w"> </span><span class="no">T2</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="no">eqb_ty</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T2</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="o">...</span><span class="w">
+
+</span><span class="c">(** can we do this? **)</span><span class="w">
+</span><span class="o">|</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="o">(</span><span class="no">Arrow</span><span class="w"> </span><span class="no">T</span><span class="w">   </span><span class="no">T'</span><span class="w"> </span><span class="o">),</span><span class="no">Some</span><span class="w"> </span><span class="no">T</span><span class="w">  </span><span class="p">=&gt;</span><span class="w"> </span><span class="o">...</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<blockquote>
+  <p>the answer is <strong>NO</strong> because this demands a <em>decidable equality</em>. 
+我好奇的是，用 typeclass 是不是就可以 bake in 这个功能了？尤其是在 Coq function 还是 total 的情况下</p>
+</blockquote>
+
+<h2 id="digression-improving-the-notation">Digression: Improving the Notation</h2>
+
+<p>这里我们可以自己定义一个 Haskell <code class="highlighter-rouge">do</code> notation 风格的 <em>monadic</em> notation:</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="k">Notation</span><span class="w"> </span><span class="s2">" x &lt;- e1 ;; e2"</span><span class="w"> </span><span class="p">:=</span><span class="w"> </span><span class="o">(</span><span class="kr">match</span><span class="w"> </span><span class="no">e1</span><span class="w"> </span><span class="kp">with</span><span class="w">
+                              </span><span class="o">|</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="err">⇒</span><span class="w"> </span><span class="no">e2</span><span class="w">
+                              </span><span class="o">|</span><span class="w"> </span><span class="no">None</span><span class="w"> </span><span class="err">⇒</span><span class="w"> </span><span class="no">None</span><span class="w">
+                              </span><span class="kr">end</span><span class="o">)</span><span class="w">
+         </span><span class="o">(</span><span class="no">right</span><span class="w"> </span><span class="no">associativity</span><span class="o">,</span><span class="w"> </span><span class="kp">at</span><span class="w"> </span><span class="no">level</span><span class="w"> </span><span class="mi">60</span><span class="o">).</span><span class="w">
+
+</span><span class="k">Notation</span><span class="w"> </span><span class="s2">" 'return' e "</span><span class="w">
+  </span><span class="p">:=</span><span class="w"> </span><span class="o">(</span><span class="no">Some</span><span class="w"> </span><span class="no">e</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="kp">at</span><span class="w"> </span><span class="no">level</span><span class="w"> </span><span class="mi">60</span><span class="o">).</span><span class="w">
+
+</span><span class="k">Notation</span><span class="w"> </span><span class="s2">" 'fail' "</span><span class="w">
+  </span><span class="p">:=</span><span class="w"> </span><span class="no">None</span><span class="pi">.</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>好看一些吧反正：</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="rouge-code"><pre><span class="k">Fixpoint</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="o">(</span><span class="no">Gamma</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">context</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="no">t</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">tm</span><span class="o">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">option</span><span class="w"> </span><span class="no">ty</span><span class="w"> </span><span class="p">:=</span><span class="w">
+  </span><span class="kr">match</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="kp">with</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">var</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="err">⇒</span><span class="w">
+      </span><span class="no">Gamma</span><span class="w"> </span><span class="no">x</span><span class="w"> 
+  </span><span class="o">|</span><span class="w"> </span><span class="no">abs</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">t12</span><span class="w"> </span><span class="err">⇒</span><span class="w">
+      </span><span class="no">T12</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="o">(</span><span class="no">update</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="no">T11</span><span class="o">)</span><span class="w"> </span><span class="no">t12</span><span class="w"> </span><span class="o">;;</span><span class="w">
+      </span><span class="kr">return</span><span class="w"> </span><span class="o">(</span><span class="no">Arrow</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T12</span><span class="o">)</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">app</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="no">t2</span><span class="w"> </span><span class="err">⇒</span><span class="w">
+      </span><span class="no">T1</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="o">;;</span><span class="w">
+      </span><span class="no">T2</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t2</span><span class="w"> </span><span class="o">;;</span><span class="w">
+      </span><span class="kr">match</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="kp">with</span><span class="w"> 
+      </span><span class="o">|</span><span class="w"> </span><span class="no">Arrow</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T12</span><span class="w"> </span><span class="err">⇒</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="no">eqb_ty</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">T2</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="kr">return</span><span class="w"> </span><span class="no">T12</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="no">fail</span><span class="w">
+      </span><span class="o">|</span><span class="w"> </span><span class="p">_</span><span class="w"> </span><span class="err">⇒</span><span class="w"> </span><span class="no">fail</span><span class="w">
+      </span><span class="kr">end</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="properties">Properties</h2>
+
+<p>最后我们需要验证一下算法的正确性：
+这里的 soundness 和 completess 都是围绕 “typechecking function ~ typing relation inference rule” 这组关系来说的：</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="k">Theorem</span><span class="w"> </span><span class="no">type_checking_sound</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="err">∀</span><span class="no">Gamma</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="no">T</span><span class="o">,</span><span class="w">
+  </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">T</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="no">has_type</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="no">T</span><span class="pi">.</span><span class="w">
+
+</span><span class="k">Theorem</span><span class="w"> </span><span class="no">type_checking_complete</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="err">∀</span><span class="no">Gamma</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="no">T</span><span class="o">,</span><span class="w">
+  </span><span class="no">has_type</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="no">T</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">T</span><span class="pi">.</span><span class="w">
+
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="exercise">Exercise</h2>
+
+<p>给 <code class="highlighter-rouge">MoreStlc.v</code> 里的 StlcE 写 typechecker, 然后 prove soundness / completeness （过程中用了非常 mega 的 tactics）</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="c">(** 还不能这么写 **)</span><span class="w">
+</span><span class="o">|</span><span class="w"> </span><span class="no">fst</span><span class="w"> </span><span class="no">p</span><span class="w"> </span><span class="p">=&gt;</span><span class="w">
+    </span><span class="o">(</span><span class="no">Prod</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="no">T2</span><span class="o">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">p</span><span class="w"> </span><span class="o">;;</span><span class="w">
+
+
+</span><span class="c">(** 要这样……感觉是 notation 的缘故？并且要提供 fallback case 才能通过 exhaustive check 是真的 **)</span><span class="w">
+</span><span class="o">|</span><span class="w"> </span><span class="no">fst</span><span class="w"> </span><span class="no">p</span><span class="w"> </span><span class="p">=&gt;</span><span class="w">
+    </span><span class="no">Tp</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="no">type_check</span><span class="w"> </span><span class="no">Gamma</span><span class="w"> </span><span class="no">p</span><span class="w"> </span><span class="o">;;</span><span class="w">
+    </span><span class="kr">match</span><span class="w"> </span><span class="no">Tp</span><span class="w"> </span><span class="kp">with</span><span class="w">
+    </span><span class="o">|</span><span class="w"> </span><span class="o">(</span><span class="no">Prod</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="no">T2</span><span class="o">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">T1</span><span class="w">
+    </span><span class="o">|</span><span class="w"> </span><span class="p">_</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">fail</span><span class="w">
+    </span><span class="kr">end</span><span class="pi">.</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="extra-exercise-profmtf">Extra Exercise (Prof.Mtf)</h2>
+
+<blockquote>
+  <p>I believe this part of exercise was added by Prof. Fluet (not found in SF website version)</p>
+</blockquote>
+
+<p>给 <code class="highlighter-rouge">MoreStlc.v</code> 的 operational semantics 写 Interpreter (<code class="highlighter-rouge">stepf</code>), 然后 prove soundness / completeness…</p>
+
+<h3 id="step-vs-stepf"><code class="highlighter-rouge">step</code> vs. <code class="highlighter-rouge">stepf</code></h3>
+
+<p>首先我们定义了 <code class="highlighter-rouge">value</code> 关系的函数版本 <code class="highlighter-rouge">valuef</code>，
+然后我们定义 <code class="highlighter-rouge">step</code> 关系的函数版本 <code class="highlighter-rouge">stepf</code>:</p>
+
+<p>以 pure STLC 为例：</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="k">Inductive</span><span class="w"> </span><span class="no">step</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">tm</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="no">tm</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kr">Prop</span><span class="w"> </span><span class="p">:=</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">ST_AppAbs</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kr">forall</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">t12</span><span class="w"> </span><span class="no">v2</span><span class="o">,</span><span class="w">
+         </span><span class="no">value</span><span class="w"> </span><span class="no">v2</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+         </span><span class="o">(</span><span class="no">app</span><span class="w"> </span><span class="o">(</span><span class="no">abs</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="no">T11</span><span class="w"> </span><span class="no">t12</span><span class="o">)</span><span class="w"> </span><span class="no">v2</span><span class="o">)</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">[</span><span class="no">x</span><span class="p">:=</span><span class="no">v2</span><span class="o">]</span><span class="no">t12</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">ST_App1</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kr">forall</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="no">t1'</span><span class="w"> </span><span class="no">t2</span><span class="o">,</span><span class="w">
+         </span><span class="no">t1</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="no">t1'</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+         </span><span class="o">(</span><span class="no">app</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="no">t2</span><span class="o">)</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">(</span><span class="no">app</span><span class="w"> </span><span class="no">t1'</span><span class="w"> </span><span class="no">t2</span><span class="o">)</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">ST_App2</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kr">forall</span><span class="w"> </span><span class="no">v1</span><span class="w"> </span><span class="no">t2</span><span class="w"> </span><span class="no">t2'</span><span class="o">,</span><span class="w">
+         </span><span class="no">value</span><span class="w"> </span><span class="no">v1</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+         </span><span class="no">t2</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="no">t2'</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+         </span><span class="o">(</span><span class="no">app</span><span class="w"> </span><span class="no">v1</span><span class="w"> </span><span class="no">t2</span><span class="o">)</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">(</span><span class="no">app</span><span class="w"> </span><span class="no">v1</span><span class="w"> </span><span class="no">t2'</span><span class="o">)</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="k">Fixpoint</span><span class="w"> </span><span class="no">stepf</span><span class="w"> </span><span class="o">(</span><span class="no">t</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">tm</span><span class="o">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">option</span><span class="w"> </span><span class="no">tm</span><span class="w"> </span><span class="p">:=</span><span class="w">
+  </span><span class="kr">match</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="kp">with</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">var</span><span class="w"> </span><span class="no">x</span><span class="w">        </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">None</span><span class="w"> </span><span class="c">(* We only define step for closed terms *)</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">abs</span><span class="w"> </span><span class="no">x1</span><span class="w"> </span><span class="no">T1</span><span class="w"> </span><span class="no">t2</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">None</span><span class="w"> </span><span class="c">(* Abstraction is a value *)</span><span class="w">
+  </span><span class="o">|</span><span class="w"> </span><span class="no">app</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="no">t2</span><span class="w">    </span><span class="p">=&gt;</span><span class="w">
+    </span><span class="kr">match</span><span class="w"> </span><span class="no">stepf</span><span class="w"> </span><span class="no">t1</span><span class="o">,</span><span class="w"> </span><span class="no">stepf</span><span class="w"> </span><span class="no">t2</span><span class="o">,</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="kp">with</span><span class="w">
+    </span><span class="o">|</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">t1'</span><span class="o">,</span><span class="w"> </span><span class="p">_</span><span class="w">       </span><span class="o">,</span><span class="w"> </span><span class="p">_</span><span class="w">           </span><span class="p">=&gt;</span><span class="w">                     </span><span class="no">Some</span><span class="w"> </span><span class="o">(</span><span class="no">app</span><span class="w"> </span><span class="no">t1'</span><span class="w"> </span><span class="no">t2</span><span class="o">)</span><span class="w">
+    </span><span class="o">|</span><span class="w"> </span><span class="no">None</span><span class="w">    </span><span class="o">,</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">t2'</span><span class="o">,</span><span class="w"> </span><span class="p">_</span><span class="w">           </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">assert</span><span class="w"> </span><span class="o">(</span><span class="no">valuef</span><span class="w"> </span><span class="no">t1</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="no">Some</span><span class="w"> </span><span class="o">(</span><span class="no">app</span><span class="w"> </span><span class="no">t1</span><span class="w"> </span><span class="no">t2'</span><span class="o">))</span><span class="w"> </span><span class="c">(* otherwise [t1]      is a normal form *)</span><span class="w">
+    </span><span class="o">|</span><span class="w"> </span><span class="no">None</span><span class="w">    </span><span class="o">,</span><span class="w"> </span><span class="no">None</span><span class="w">    </span><span class="o">,</span><span class="w"> </span><span class="no">abs</span><span class="w"> </span><span class="no">x</span><span class="w"> </span><span class="no">T</span><span class="w"> </span><span class="no">t11</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="no">assert</span><span class="w"> </span><span class="o">(</span><span class="no">valuef</span><span class="w"> </span><span class="no">t2</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="no">Some</span><span class="w"> </span><span class="o">([</span><span class="no">x</span><span class="p">:=</span><span class="no">t2</span><span class="o">]</span><span class="no">t11</span><span class="o">))</span><span class="w"> </span><span class="c">(* otherwise [t1], [t2] are normal forms *)</span><span class="w">
+    </span><span class="o">|</span><span class="w"> </span><span class="p">_</span><span class="w">       </span><span class="o">,</span><span class="w"> </span><span class="p">_</span><span class="w">       </span><span class="o">,</span><span class="w"> </span><span class="p">_</span><span class="w">           </span><span class="p">=&gt;</span><span class="w">                     </span><span class="no">None</span><span class="w">
+    </span><span class="kr">end</span><span class="w">
+
+</span><span class="k">Definition</span><span class="w"> </span><span class="no">assert</span><span class="w"> </span><span class="o">(</span><span class="no">b</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">bool</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="no">a</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">option</span><span class="w"> </span><span class="no">tm</span><span class="o">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="no">option</span><span class="w"> </span><span class="no">tm</span><span class="w"> </span><span class="p">:=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="no">b</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="no">a</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="no">None</span><span class="pi">.</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<ol>
+  <li>
+    <p>对于关系，一直就是 implicitly applied 的，在可用时即使用。
+对于函数，我们需要手动指定 match 的顺序</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">stepf t1 =&gt; None</code> 只代表这是一个 <code class="highlighter-rouge">normal form</code>，但不一定就是 <code class="highlighter-rouge">value</code>，还有可能是 stuck 了，所以我们需要额外的 <code class="highlighter-rouge">assert</code>ion. (失败时返回异常)
+<strong>dynamics</strong> 本身与 <strong>statics</strong> 是正交的，在 <code class="highlighter-rouge">typecheck</code> 之后我们可以有 <code class="highlighter-rouge">progress</code>，但是现在还没有</p>
+  </li>
+</ol>
+
+<h3 id="soundness">Soundness</h3>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="k">Theorem</span><span class="w"> </span><span class="no">sound_stepf</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kr">forall</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="no">t'</span><span class="o">,</span><span class="w">
+    </span><span class="no">stepf</span><span class="w"> </span><span class="no">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">Some</span><span class="w"> </span><span class="no">t'</span><span class="w">  </span><span class="p">-&gt;</span><span class="w">  </span><span class="no">t</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="no">t'</span><span class="pi">.</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>证明用了一个 given 的非常夸张的 automation…</p>
+
+<p>不过帮助我找到了 <code class="highlighter-rouge">stepf</code> 和 <code class="highlighter-rouge">step</code> 的多处 inconsistency:</p>
+<ul>
+  <li>3 次做 <code class="highlighter-rouge">subst</code> 时依赖的 <code class="highlighter-rouge">valuef</code> 不能省</li>
+  <li><code class="highlighter-rouge">valuef pair</code> 该怎么写才合适？
+最后把 <code class="highlighter-rouge">step</code> 中的 <code class="highlighter-rouge">value p -&gt;</code> 改成了 <code class="highlighter-rouge">value v1 -&gt; value v2 -&gt;</code>，
+因为 <code class="highlighter-rouge">valuef (pair v1 v2)</code> 出来的 <code class="highlighter-rouge">valuef v1 &amp;&amp; valuef v2</code> 比较麻烦。
+但底线是：<strong>两者必须 consistent！</strong> 这时就能感受到 Formal Methods 的严谨了。</li>
+</ul>
+
+<h3 id="completeness">Completeness</h3>
+
+<p>发现了 pair 实现漏了 2 个 case……然后才发现了 <code class="highlighter-rouge">Soundness</code> 自动化中的 <code class="highlighter-rouge">valuef pair</code> 问题</p>
+
+<h2 id="extra-mentioned">Extra (Mentioned)</h2>
+<hr />
+
+<p><a href="https://lispcast.com/church-vs-curry-types/">Church Style vs. Curry Style</a>
+<a href="https://en.wikipedia.org/wiki/Rice%27s_theorem">Rice’s Theorem</a></p>
+
+<p>CakeML</p>
+<ul>
+  <li>prove correctness of ML lang compiler</li>
+  <li>latest paper on verifying GC</li>
+</ul>
+
+
+                <hr style="visibility: hidden;">
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2019/03/10/sf-plf-10-subtyping/" data-toggle="tooltip" data-placement="top" title="「SF-PLF」10 Sub">
+                        Previous<br>
+                        <span>「SF-PLF」10 Sub</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2019/03/12/sf-plf-12-records/" data-toggle="tooltip" data-placement="top" title="「SF-PLF」12 Records">
+                        Next<br>
+                        <span>「SF-PLF」12 Records</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <hr style="visibility: hidden;">
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+                
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+
+<section>
+    
+        <hr class="hidden-sm hidden-xs">
+    
+    <h5><a href="/archive/">FEATURED TAGS</a></h5>
+    <div class="tags">
+        
+        
+        
+        </a>
+        
+        
+                <a data-sort="0065" 
+                    href="/archive/?tag=%E7%9F%A5%E4%B9%8E"
+                    title="知乎"
+                    rel="10">知乎</a>
+        
+                <a data-sort="0036" 
+                    href="/archive/?tag=%E7%AC%94%E8%AE%B0"
+                    title="笔记"
+                    rel="39">笔记</a>
+        
+                <a data-sort="0039" 
+                    href="/archive/?tag=Coq"
+                    title="Coq"
+                    rel="36">Coq</a>
+        
+                <a data-sort="0039" 
+                    href="/archive/?tag=SF+%28%E8%BD%AF%E4%BB%B6%E5%9F%BA%E7%A1%80%29"
+                    title="SF (软件基础)"
+                    rel="36">SF (软件基础)</a>
+        
+                <a data-sort="0056" 
+                    href="/archive/?tag=PLF+%28%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%29"
+                    title="PLF (编程语言基础)"
+                    rel="19">PLF (编程语言基础)</a>
+        
+                <a data-sort="0056" 
+                    href="/archive/?tag=Web"
+                    title="Web"
+                    rel="19">Web</a>
+        
+                <a data-sort="0059" 
+                    href="/archive/?tag=LF+%28%E9%80%BB%E8%BE%91%E5%9F%BA%E7%A1%80%29"
+                    title="LF (逻辑基础)"
+                    rel="16">LF (逻辑基础)</a>
+        
+                <a data-sort="0068" 
+                    href="/archive/?tag=UX%2FUI"
+                    title="UX/UI"
+                    rel="7">UX/UI</a>
+        
+                <a data-sort="0069" 
+                    href="/archive/?tag=%E4%BA%A7%E5%93%81"
+                    title="产品"
+                    rel="6">产品</a>
+        
+                <a data-sort="0069" 
+                    href="/archive/?tag=PWA"
+                    title="PWA"
+                    rel="6">PWA</a>
+        
+                <a data-sort="0071" 
+                    href="/archive/?tag=JavaScript"
+                    title="JavaScript"
+                    rel="4">JavaScript</a>
+        
+                <a data-sort="0071" 
+                    href="/archive/?tag=Slides"
+                    title="Slides"
+                    rel="4">Slides</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%E7%94%9F%E6%B4%BB"
+                    title="生活"
+                    rel="3">生活</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%E8%AF%91"
+                    title="译"
+                    rel="3">译</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%E9%98%BF%E9%87%8C"
+                    title="阿里"
+                    rel="3">阿里</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=%F0%9F%87%AC%F0%9F%87%A7"
+                    title="🇬🇧"
+                    rel="3">🇬🇧</a>
+        
+                <a data-sort="0072" 
+                    href="/archive/?tag=Vim"
+                    title="Vim"
+                    rel="3">Vim</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6"
+                    title="计算机科学"
+                    rel="2">计算机科学</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=%E8%AE%A1%E7%AE%97%E7%90%86%E8%AE%BA"
+                    title="计算理论"
+                    rel="2">计算理论</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=CSS"
+                    title="CSS"
+                    rel="2">CSS</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=Wechat"
+                    title="Wechat"
+                    rel="2">Wechat</a>
+        
+                <a data-sort="0073" 
+                    href="/archive/?tag=hUX+%E9%9A%8F%E6%83%B3%E5%BD%95"
+                    title="hUX 随想录"
+                    rel="2">hUX 随想录
+    </div>
+</section>
+
+
+                <!-- Friends Blog -->
+                
+<hr>
+<h5>FRIENDS</h5>
+<ul class="list-inline">
+  
+  <li><a href="http://mida.re/">乱序</a></li>
+  
+  <li><a href="http://qianduan.guru/">前端外刊评论</a></li>
+  
+  <li><a href="http://lingyu.wang/">天镶的博客</a></li>
+  
+  <li><a href="http://hmqk1995.github.io">Luke 的自留地</a></li>
+  
+  <li><a href="http://ebnbin.com/">Ebn's Blog</a></li>
+  
+  <li><a href="http://blog.smdcn.net">SmdCn's Blog</a></li>
+  
+  <li><a href="https://www.ruoyaowu.com/">David's Game</a></li>
+  
+  <li><a href="http://dhong.co">DHong Say</a></li>
+  
+  <li><a href="http://ingf.github.io/">尹峰以为</a></li>
+  
+  <li><a href="http://xieminis.me/">解旻的博客</a></li>
+  
+</ul>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<!-- add support for mathjax by voleking-->
+
+
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "hux";
+    var disqus_identifier = "/2019/03/11/sf-plf-11-typechecking";
+    var disqus_url = "http://localhost:4000/2019/03/11/sf-plf-11-typechecking/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'right',
+          // icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <!-- SNS Link -->
+                
+
+
+<ul class="list-inline text-center">
+
+
+  
+  
+  <li>
+    <a href="https://twitter.com/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  
+  <li>
+    <a target="_blank" href="https://www.zhihu.com/people/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa  fa-stack-1x fa-inverse">知</i>
+      </span>
+    </a>
+  </li>
+  
+  
+  <li>
+    <a target="_blank" href="http://weibo.com/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  
+  
+  <li>
+    <a target="_blank" href="https://github.com/huxpro">
+      <span class="fa-stack fa-lg">
+        <i class="fa fa-circle fa-stack-2x"></i>
+        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+      </span>
+    </a>
+  </li>
+  
+  
+</ul>
+
+                <p class="copyright text-muted">
+                    Copyright &copy; lxd's Blog 2019
+                    <br>
+                    Powered by <a href="http://huangxuan.me">Hux Blog</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<!-- Currently, only navbar scroll-down effect at desktop still depends on this -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script src="/js/snackbar.js "></script>
+<script src="/js/sw-registration.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!--
+     Because of the native support for backtick-style fenced code blocks
+     right within the Markdown is landed in Github Pages,
+     From V1.6, There is no need for Highlight.js,
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+
+
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+<!-- Side Catalog -->
+
+
+
+<!-- Multi-Lingual -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
