@@ -1,0 +1,19 @@
+[
+  
+    {
+      "title"    : "Welcome to Jekyll",
+      "category" : "Jekyll is awesome",
+      "tags"     : "jekyll and web",
+      "url"      : "/welcome-to-jekyll/",
+      "date"     : "04 Aug 2015"
+    } ,
+  
+    {
+      "title"    : "How to use",
+      "category" : "I love Jekyll",
+      "tags"     : "jekyll and template",
+      "url"      : "/how-to-use/",
+      "date"     : "03 Aug 2015"
+    } 
+  
+]
