@@ -1,6 +1,14 @@
 [
   
     {
+      "title"    : "My first blog",
+      "category" : "",
+      "tags"     : "",
+      "url"      : "/My-first-blog/",
+      "date"     : "15 Sep 2019"
+    } ,
+  
+    {
       "title"    : "Welcome to Jekyll",
       "category" : "Jekyll is awesome",
       "tags"     : "jekyll and web",
