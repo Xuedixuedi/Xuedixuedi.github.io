@@ -34,7 +34,7 @@ layout: default
                 ><h2 class="post-title" itemprop="name">{{ post.title }}</h2></a
             >
             <p class="description">
-                {{ post.content | strip_html | truncatewords: 40 }}
+                {{ post.content | strip_html | truncatewords: 10 }}
                 <a href="{{ post.url | prepend: site.baseurl }}" class="link"
                     >Read more about {{ post.title }}</a
                 >
