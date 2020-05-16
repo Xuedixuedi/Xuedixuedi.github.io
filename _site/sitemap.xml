@@ -2,15 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	
 	  <url>
-		<loc>http://localhost:4000/My-first-blog/</loc>
-	  </url>
-	
-	  <url>
-		<loc>http://localhost:4000/welcome-to-jekyll/</loc>
-	  </url>
-	
-	  <url>
-		<loc>http://localhost:4000/how-to-use/</loc>
+		<loc>http://localhost:4000/%E6%88%91-%E6%9D%A5-%E8%BE%A3/</loc>
 	  </url>
 	
 </urlset>

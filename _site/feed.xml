@@ -5,50 +5,24 @@
     <description>里面什么也没有，你可以出去了</description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 15 Sep 2019 16:46:46 +0800</pubDate>
-    <lastBuildDate>Sun, 15 Sep 2019 16:46:46 +0800</lastBuildDate>
-    <generator>Jekyll v3.8.5</generator>
+    <pubDate>Fri, 20 Mar 2020 19:41:37 +0800</pubDate>
+    <lastBuildDate>Fri, 20 Mar 2020 19:41:37 +0800</lastBuildDate>
+    <generator>Jekyll v4.0.0</generator>
     
       <item>
-        <title>My first blog</title>
-        <description>&lt;p&gt;我是lxd&lt;/p&gt;
+        <title>我来辣</title>
+        <description>&lt;p&gt;嘿嘿！&lt;/p&gt;
+
+&lt;p&gt;to do list:我要把写一篇 GitHub 静态 blog 的教程提上日程&lt;/p&gt;
 </description>
-        <pubDate>Sun, 15 Sep 2019 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/My-first-blog/</link>
-        <guid isPermaLink="true">http://localhost:4000/My-first-blog/</guid>
+        <pubDate>Fri, 11 Oct 2019 03:42:44 +0800</pubDate>
+        <link>http://localhost:4000/%E6%88%91-%E6%9D%A5-%E8%BE%A3/</link>
+        <guid isPermaLink="true">http://localhost:4000/%E6%88%91-%E6%9D%A5-%E8%BE%A3/</guid>
+        
+        <category>lxd</category>
         
         
-      </item>
-    
-      <item>
-        <title>Welcome to Jekyll</title>
-        <description>&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory - edit this post and re-build (or run with the &lt;code class=&quot;highlighter-rouge&quot;&gt;-w&lt;/code&gt; switch) to see your changes! To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention: YYYY-MM-DD-name-of-post.ext.&lt;/p&gt; &lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt; &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt; &lt;p&gt;Check out the &lt;a href=&quot;http://jekyllrb.com&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most...</description>
-        <pubDate>Tue, 04 Aug 2015 11:21:35 +0800</pubDate>
-        <link>http://localhost:4000/welcome-to-jekyll/</link>
-        <guid isPermaLink="true">http://localhost:4000/welcome-to-jekyll/</guid>
-        
-        <category>jekyll</category>
-        
-        <category>web</category>
-        
-        
-        <category>Jekyll is awesome</category>
-        
-      </item>
-    
-      <item>
-        <title>How to use</title>
-        <description>&lt;p&gt;This is a simple and minimalist template for Jekyll designed for developers that want to write blog posts but don’t want to care about frontend stuff.&lt;/p&gt; &lt;p&gt;The Theme features:&lt;/p&gt; &lt;ul&gt; &lt;li&gt;Gulp&lt;/li&gt; &lt;li&gt;Stylus (Jeet, Rupture, Kouto Swiss)&lt;/li&gt; &lt;li&gt;Smoothscroll&lt;/li&gt; &lt;li&gt;Live Search&lt;/li&gt; &lt;li&gt;Offcanvas Menu&lt;/li&gt; &lt;li&gt;SVG icons&lt;/li&gt; &lt;li&gt;Shell Script to create posts&lt;/li&gt; &lt;li&gt;Tags page&lt;/li&gt; &lt;li&gt;Series page&lt;/li&gt; &lt;li&gt;About Me page&lt;/li&gt; &lt;li&gt;Feed RSS&lt;/li&gt; &lt;li&gt;Sitemap.xml&lt;/li&gt; &lt;li&gt;Color Customization&lt;/li&gt; &lt;li&gt;Info Customization&lt;/li&gt; &lt;/ul&gt; &lt;h2 id=&quot;basic-setup&quot;&gt;Basic Setup&lt;/h2&gt; &lt;ol&gt; &lt;li&gt;&lt;a href=&quot;http://jekyllrb.com&quot;&gt;Install Jekyll&lt;/a&gt;&lt;/li&gt; &lt;li&gt;Fork the &lt;a href=&quot;https://github.com/willianjusten/will-jekyll-template/fork&quot;&gt;Will Jekyll Template&lt;/a&gt;&lt;/li&gt; &lt;li&gt;Clone the repo you just forked.&lt;/li&gt; &lt;li&gt;Edit &lt;code class=&quot;highlighter-rouge&quot;&gt;_config.yml&lt;/code&gt; to personalize your site.&lt;/li&gt; &lt;li&gt;Check out the sample posts in &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; to see examples...</description>
-        <pubDate>Mon, 03 Aug 2015 11:32:44 +0800</pubDate>
-        <link>http://localhost:4000/how-to-use/</link>
-        <guid isPermaLink="true">http://localhost:4000/how-to-use/</guid>
-        
-        <category>jekyll</category>
-        
-        <category>template</category>
-        
-        
-        <category>I love Jekyll</category>
+        <category>I love lxd</category>
         
       </item>
     
