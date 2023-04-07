@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://morethan-log.vercel.app
+Host: https://https://xuedixuedi.github.io/
 
 # Sitemaps
-Sitemap: https://morethan-log.vercel.app/sitemap.xml
+Sitemap: https://https://xuedixuedi.github.io/sitemap.xml
