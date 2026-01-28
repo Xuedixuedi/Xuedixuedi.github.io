@@ -144,7 +144,10 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
     
     if (!post) {
        return {
-         notFound: true
+         props: {
+           post: null,
+           recordMap: null
+         }
        }
     }
 
@@ -166,7 +169,10 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
   } catch (error) {
     console.error('Failed to get posts:', error)
     return {
-      notFound: true
+      props: {
+        post: null,
+        recordMap: null
+      }
     }
   }
 }
