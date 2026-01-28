@@ -1,5 +1,7 @@
 # Notion Blog Starter
 
+> 本项目为纯 Vibe Code 生成，使用 Trae + Gemini-3-Pro 模型
+
 这是一个基于 Next.js 和 Notion API 的静态博客生成器。它可以直接读取你的 Notion 数据库作为内容源，并生成一个高性能的静态博客网站。
 
 风格和功能参考了 [morethan-log](https://github.com/morethanmin/morethan-log)。
