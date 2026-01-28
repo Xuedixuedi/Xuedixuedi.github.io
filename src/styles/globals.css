@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --fg-color: #5b4760;
+  --bg-color: #FCF8F8; /* 浅粉色背景 */
+}
+
+[data-theme='dark'] {
+  --fg-color: #d4d4d4;
+  --bg-color: #121212;
+}
+
+body {
+  color: var(--fg-color);
+  background: var(--bg-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* Notion Specific Overrides */
+.notion {
+  font-family: inherit;
+}
+
+.notion-app {
+  background: transparent !important;
+}
+
+/* Dark mode overrides for Notion content */
+[data-theme='dark'] .notion-body {
+  background: #121212 !important;
+}
+
+[data-theme='dark'] .notion-header {
+  background: rgba(18, 18, 18, 0.9) !important;
+}
+
+/* Hide Notion database properties on the post page */
+.notion-container-custom .notion-collection-page-properties {
+  display: none !important;
+}
