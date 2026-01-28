@@ -125,13 +125,13 @@ export async function getStaticPaths() {
 
     return {
       paths,
-      fallback: true
+      fallback: false
     }
   } catch (error) {
     console.error('Failed to generate paths:', error)
     return {
       paths: [],
-      fallback: true
+      fallback: false
     }
   }
 }
@@ -148,7 +148,13 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
        }
     }
 
-    const recordMap = await getPage(post.id)
+    let recordMap = null
+    try {
+      recordMap = await getPage(post.id)
+    } catch (err) {
+      console.error(`Failed to fetch Notion page ${post.id} for slug ${params.slug}:`, err)
+      // Fallthrough to return null recordMap
+    }
 
     return {
       props: {
@@ -158,7 +164,7 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
       revalidate: isGithubActions ? undefined : 1
     }
   } catch (error) {
-    console.error('Failed to get post:', error)
+    console.error('Failed to get posts:', error)
     return {
       notFound: true
     }
