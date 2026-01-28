@@ -23,25 +23,9 @@ export const ProfileCard = () => {
         </div>
       </div>
 
-      <div className="border-t border-gray-100 dark:border-zinc-700 pt-6">
-        <div className="text-sm font-bold mb-4 dark:text-gray-200">Service</div>
-        <div className="space-y-2">
-          {CONFIG.projects.map((project) => (
-            <a
-              key={project.name}
-              href={project.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 p-2 rounded-lg hover:bg-day-100 dark:hover:bg-zinc-700 transition-colors"
-            >
-              <span className="text-xl">📦</span>
-              <span className="text-sm dark:text-gray-300">{project.name}</span>
-            </a>
-          ))}
-        </div>
-      </div>
 
-      <div className="border-t border-gray-100 dark:border-zinc-700 pt-6 mt-6">
+
+      <div className="border-t border-gray-100 dark:border-zinc-700 pt-6">
         <div className="text-sm font-bold mb-4 dark:text-gray-200">Contact</div>
         <div className="space-y-2">
           {CONFIG.profile.github && (
