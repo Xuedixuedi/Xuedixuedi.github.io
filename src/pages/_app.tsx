@@ -3,6 +3,10 @@ import '@/styles/globals.css'
 import 'react-notion-x/src/styles.css'
 // used for code syntax highlighting (optional)
 import 'prismjs/themes/prism-tomorrow.css'
+import 'prism-themes/themes/prism-laserwave.css'
+import '@/lib/prism'
+// custom code block enhancements
+import '@/styles/code-enhancements.css'
 // used for collection views (optional)
 import 'rc-dropdown/assets/index.css'
 // used for rendering equations (optional)

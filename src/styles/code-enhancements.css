@@ -1,0 +1,133 @@
+/* Laserwave Theme Code Block Styling */
+
+/* Code block wrapper for better spacing and borders */
+.code-block-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+/* Notion code block styling enhancements - Laserwave theme */
+.notion-code {
+  background: #27212e !important; /* Laserwave background color */
+  border: 1px solid #3a304a !important; /* Laserwave border color */
+  border-radius: 0.5rem !important;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  overflow-x: auto !important;
+}
+
+/* Code block content padding */
+.notion-code > pre {
+  padding: 1.25rem !important;
+  margin: 0 !important;
+}
+
+/* Language label positioning */
+.code-block-wrapper .absolute {
+  z-index: 10;
+}
+
+/* Ensure proper spacing for language label */
+.code-block-wrapper .absolute.top-2.right-12 {
+  right: 3rem;
+}
+
+/* Laserwave theme syntax highlighting colors */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #91889a !important; /* Laserwave comment color */
+  font-style: italic !important;
+}
+
+.token.namespace {
+  opacity: 0.7 !important;
+}
+
+.token.string,
+.token.attr-value {
+  color: #f92aad !important; /* Laserwave string color */
+}
+
+.token.punctuation,
+.token.operator {
+  color: #7b6995 !important; /* Laserwave punctuation color */
+}
+
+.token.entity,
+.token.url,
+.token.symbol,
+.token.number,
+.token.boolean,
+.token.variable,
+.token.constant,
+.token.property,
+.token.regex,
+.token.inserted {
+  color: #fd9353 !important; /* Laserwave number/color color */
+}
+
+.token.atrule,
+.token.keyword,
+.token.attr-name,
+.language-autohotkey .token.selector {
+  color: #c792ea !important; /* Laserwave keyword color */
+}
+
+.token.function,
+.token.deleted,
+.language-autohotkey .token.tag {
+  color: #82aaff !important; /* Laserwave function color */
+}
+
+.token.tag,
+.token.selector,
+.language-autohotkey .token.keyword {
+  color: #f4f99d !important; /* Laserwave tag color */
+}
+
+.token.important,
+.token.function,
+.token.bold {
+  font-weight: bold !important;
+}
+
+.token.italic {
+  font-style: italic !important;
+}
+
+/* Mermaid diagram container styling */
+.mermaid-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.mermaid-diagram {
+  width: 60%;
+  max-width: 60%;
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .mermaid-diagram {
+  background: #27212e; /* Laserwave background to match code blocks */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mermaid-diagram {
+    width: 90%;
+    max-width: 90%;
+  }
+  
+  .code-block-wrapper .absolute.top-2.right-12 {
+    right: 2rem;
+  }
+}

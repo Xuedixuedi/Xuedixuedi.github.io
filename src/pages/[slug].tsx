@@ -10,10 +10,8 @@ import { useTheme } from 'next-themes'
 import { format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
-// 动态导入第三方组件以优化性能
-const Code = dynamic(() =>
-  import('react-notion-x/build/third-party/code').then((m) => m.Code)
-)
+import CodeBlock from '@/components/CodeBlock'
+
 const Collection = dynamic(() =>
   import('react-notion-x/build/third-party/collection').then((m) => m.Collection)
 )
@@ -82,7 +80,7 @@ export default function Post({ recordMap, post }: { recordMap: any, post: any })
               fullPage={false} 
               darkMode={mounted ? isDarkMode : false}
               components={{
-                Code,
+                Code: CodeBlock,
                 Collection,
                 Equation,
                 Modal,
