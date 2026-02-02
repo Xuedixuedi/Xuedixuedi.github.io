@@ -45,7 +45,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = (props) => {
         </div>
         
         {isMermaidView ? (
-          <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#121212] overflow-hidden min-h-[100px] flex items-center justify-center">
+          <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#121212] overflow-x-auto overflow-y-hidden min-h-[100px] flex items-center justify-center">
              <Mermaid chart={content} />
           </div>
         ) : (

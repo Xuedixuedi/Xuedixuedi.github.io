@@ -100,33 +100,42 @@
 
 /* Mermaid diagram container styling */
 .mermaid-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.5rem 0;
   display: flex;
   justify-content: center;
-  width: 100%;
-  margin: 1rem 0;
 }
 
 .mermaid-diagram {
-  width: 60%;
-  max-width: 60%;
+  width: max-content;
+  max-width: none;
   background: white;
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 1.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  text-align: center;
+}
+
+.mermaid-diagram svg {
+  display: block;
+  margin: 0 auto;
+  max-width: none;
+  height: auto;
 }
 
 [data-theme='dark'] .mermaid-diagram {
-  background: #27212e; /* Laserwave background to match code blocks */
+  background: #121212; /* Dark background to match the blog theme */
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .mermaid-diagram {
-    width: 90%;
-    max-width: 90%;
+  .mermaid-container {
+    padding: 0 1rem;
   }
-  
+
   .code-block-wrapper .absolute.top-2.right-12 {
     right: 2rem;
   }

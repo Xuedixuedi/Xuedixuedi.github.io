@@ -18,6 +18,14 @@ const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
       theme: resolvedTheme === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose',
       fontFamily: 'inherit',
+      flowchart: { useMaxWidth: false },
+      sequence: { useMaxWidth: false },
+      gantt: { useMaxWidth: false },
+      class: { useMaxWidth: false },
+      state: { useMaxWidth: false },
+      journey: { useMaxWidth: false },
+      timeline: { useMaxWidth: false },
+      mindmap: { useMaxWidth: false },
     });
   }, [resolvedTheme]);
 
@@ -45,11 +53,11 @@ const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
   }
 
   return (
-    <div className="flex justify-center w-full">
-      <div 
-        ref={ref} 
-        className="w-[60%] flex justify-center overflow-x-auto py-4 bg-white dark:bg-[#121212]"
-        dangerouslySetInnerHTML={{ __html: svg }} 
+    <div className="mermaid-container">
+      <div
+        ref={ref}
+        className="mermaid-diagram"
+        dangerouslySetInnerHTML={{ __html: svg }}
       />
     </div>
   );
