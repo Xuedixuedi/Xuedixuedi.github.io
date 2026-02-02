@@ -54,7 +54,7 @@ export const PostList = ({ posts }: { posts: Post[] }) => {
               ))}
             </div>
             <Link href={`/${post.slug}`}>
-              <h2 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer">
+              <h2 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white hover:text-[#FF7DB0] dark:hover:text-[#FF7DB0] transition-colors cursor-pointer">
                 {post.title}
               </h2>
             </Link>
