@@ -1,6 +1,7 @@
 import { NotionRenderer } from 'react-notion-x'
 import dynamic from 'next/dynamic'
 import { getPosts, getPage } from '@/lib/notion'
+import { rethrowIfBuild, withRevalidate } from '@/lib/static-props'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import Comments from '@/components/Comments'
@@ -18,8 +19,11 @@ const Collection = dynamic(() =>
 const Equation = dynamic(() =>
   import('react-notion-x/build/third-party/equation').then((m) => m.Equation)
 )
-const Pdf = dynamic(() =>
-  import('react-notion-x/build/third-party/pdf').then((m) => m.Pdf)
+// pdfjs reads DOMMatrix while the module loads, which Node does not provide.
+// Skip server rendering; the PDF chunk loads in the browser.
+const Pdf = dynamic(
+  () => import('react-notion-x/build/third-party/pdf').then((m) => m.Pdf),
+  { ssr: false }
 )
 const Modal = dynamic(
   () => import('react-notion-x/build/third-party/modal').then((m) => m.Modal),
@@ -115,38 +119,28 @@ export default function Post({ recordMap, post }: { recordMap: any, post: any })
 }
 
 export async function getStaticPaths() {
-  try {
-    const posts = await getPosts()
-    const paths = posts.map((post: any) => ({
-      params: { slug: post.slug }
-    }))
-
-    return {
-      paths,
-      fallback: false
-    }
-  } catch (error) {
-    console.error('Failed to generate paths:', error)
-    return {
-      paths: [],
-      fallback: false
-    }
+  const posts = await getPosts()
+  return {
+    paths: posts.map((post) => ({
+      params: { slug: post.slug },
+    })),
+    fallback: false,
   }
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
-  const isGithubActions = process.env.GITHUB_ACTIONS || false
   try {
     const posts = await getPosts()
-    const post = posts.find((p: any) => p.slug === params.slug)
-    
+    const post = posts.find((p) => p.slug === params.slug)
+
     if (!post) {
-       return {
-         props: {
-           post: null,
-           recordMap: null
-         }
-       }
+      const error = new Error(`No published Notion post for slug "${params.slug}"`)
+      console.error(error)
+      rethrowIfBuild(error)
+      return withRevalidate({
+        post: null,
+        recordMap: null,
+      })
     }
 
     let recordMap = null
@@ -154,23 +148,25 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
       recordMap = await getPage(post.id)
     } catch (err) {
       console.error(`Failed to fetch Notion page ${post.id} for slug ${params.slug}:`, err)
-      // Fallthrough to return null recordMap
+      rethrowIfBuild(err)
     }
 
-    return {
-      props: {
-        post,
-        recordMap
-      },
-      revalidate: isGithubActions ? undefined : 1
+    if (!recordMap?.block) {
+      const error = new Error(`Notion page ${post.id} for slug "${params.slug}" returned no blocks`)
+      console.error(error)
+      rethrowIfBuild(error)
     }
+
+    return withRevalidate({
+      post,
+      recordMap,
+    })
   } catch (error) {
     console.error('Failed to get posts:', error)
-    return {
-      props: {
-        post: null,
-        recordMap: null
-      }
-    }
+    rethrowIfBuild(error)
+    return withRevalidate({
+      post: null,
+      recordMap: null,
+    })
   }
 }
