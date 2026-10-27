@@ -53,7 +53,8 @@ jobs:
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
         env:
-          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
+          # Optional. Falls back to the public lxd-blog database when the secret is unset.
+          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID || 'f93701d92ba04185952511e3d047bb4d' }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

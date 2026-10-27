@@ -1,4 +1,5 @@
 import { getPosts } from '@/lib/notion'
+import { rethrowIfBuild, withRevalidate } from '@/lib/static-props'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { PostList } from '@/components/PostList'
@@ -128,32 +129,24 @@ export default function Home({ posts, tags }: { posts: any[], tags: Record<strin
 }
 
 export async function getStaticProps() {
-  const isGithubActions = process.env.GITHUB_ACTIONS || false
   try {
     const posts = await getPosts()
-    
-    // Calculate tags count
+
     const tags: Record<string, number> = {}
-    posts.forEach((post: any) => {
+    posts.forEach((post) => {
       post.tags.forEach((tag: string) => {
+        if (!tag) return
         tags[tag] = (tags[tag] || 0) + 1
       })
     })
 
-    return {
-      props: {
-        posts,
-        tags
-      },
-      revalidate: isGithubActions ? undefined : 1,
-    }
+    return withRevalidate({ posts, tags })
   } catch (error) {
     console.error(error)
-    return {
-      props: {
-        posts: [],
-        tags: {}
-      },
-    }
+    rethrowIfBuild(error)
+    return withRevalidate({
+      posts: [],
+      tags: {},
+    })
   }
 }

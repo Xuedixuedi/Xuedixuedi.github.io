@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Daily, even when nothing was committed, so a Notion API change fails here.
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        if: github.event_name != 'schedule'
+        run: npm run typecheck
+
+      - name: Unit tests
+        if: github.event_name != 'schedule'
+        run: npm test
+
+      - name: Notion smoke check
+        run: npm run smoke:notion
+        env:
+          # Optional. A repo variable or secret overrides the public lxd-blog database.
+          NOTION_PAGE_ID: ${{ vars.NOTION_PAGE_ID || secrets.NOTION_PAGE_ID || 'f93701d92ba04185952511e3d047bb4d' }}
+
+      - name: Build
+        if: github.event_name != 'schedule'
+        run: npm run build
+        env:
+          NOTION_PAGE_ID: ${{ vars.NOTION_PAGE_ID || secrets.NOTION_PAGE_ID || 'f93701d92ba04185952511e3d047bb4d' }}
