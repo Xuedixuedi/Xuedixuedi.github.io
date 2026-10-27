@@ -45,7 +45,19 @@ jobs:
           # Optional. A repo variable or secret overrides the public lxd-blog database.
           NOTION_PAGE_ID: ${{ vars.NOTION_PAGE_ID || secrets.NOTION_PAGE_ID || 'f93701d92ba04185952511e3d047bb4d' }}
 
-      - name: Build
+      - name: Vercel-style build
+        if: github.event_name != 'schedule'
+        run: env -u GITHUB_ACTIONS npm run build
+        env:
+          # GitHub Actions sets GITHUB_ACTIONS=true, which selects the static
+          # export. Unset it so this build matches the Vercel ISR deployment.
+          NOTION_PAGE_ID: ${{ vars.NOTION_PAGE_ID || secrets.NOTION_PAGE_ID || 'f93701d92ba04185952511e3d047bb4d' }}
+
+      - name: Clean build output
+        if: github.event_name != 'schedule'
+        run: rm -rf .next out
+
+      - name: Static export build
         if: github.event_name != 'schedule'
         run: npm run build
         env:

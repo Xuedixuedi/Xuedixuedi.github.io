@@ -1,5 +1,5 @@
 import { getPosts } from '@/lib/notion'
-import { rethrowIfBuild, withRevalidate } from '@/lib/static-props'
+import { loadHomePageProps } from '@/lib/static-props'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { PostList } from '@/components/PostList'
@@ -129,24 +129,7 @@ export default function Home({ posts, tags }: { posts: any[], tags: Record<strin
 }
 
 export async function getStaticProps() {
-  try {
-    const posts = await getPosts()
-
-    const tags: Record<string, number> = {}
-    posts.forEach((post) => {
-      post.tags.forEach((tag: string) => {
-        if (!tag) return
-        tags[tag] = (tags[tag] || 0) + 1
-      })
-    })
-
-    return withRevalidate({ posts, tags })
-  } catch (error) {
-    console.error(error)
-    rethrowIfBuild(error)
-    return withRevalidate({
-      posts: [],
-      tags: {},
-    })
-  }
+  // Throw when Notion fails so ISR keeps the last good page. An empty
+  // successful result would be cached in its place.
+  return loadHomePageProps(getPosts)
 }
