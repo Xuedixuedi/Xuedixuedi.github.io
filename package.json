@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/lib/notion-record.test.ts src/lib/static-props.test.ts",
+    "test": "node --import tsx --test src/lib/notion-record.test.ts src/lib/static-props.test.ts src/lib/revalidate.test.ts src/lib/next-config.test.ts",
     "smoke:notion": "tsx scripts/notion-smoke.ts"
   },
   "dependencies": {

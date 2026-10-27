@@ -1,7 +1,7 @@
 import { NotionRenderer } from 'react-notion-x'
 import dynamic from 'next/dynamic'
 import { getPosts, getPage } from '@/lib/notion'
-import { rethrowIfBuild, withRevalidate } from '@/lib/static-props'
+import { loadPostPageProps, loadPostStaticPaths } from '@/lib/static-props'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import Comments from '@/components/Comments'
@@ -119,54 +119,13 @@ export default function Post({ recordMap, post }: { recordMap: any, post: any })
 }
 
 export async function getStaticPaths() {
-  const posts = await getPosts()
-  return {
-    paths: posts.map((post) => ({
-      params: { slug: post.slug },
-    })),
-    fallback: false,
-  }
+  // `fallback: 'blocking'` on Vercel so a post added after the build is
+  // rendered on first visit. Static export cannot use fallback.
+  return loadPostStaticPaths(getPosts)
 }
 
 export async function getStaticProps({ params }: { params: { slug: string } }) {
-  try {
-    const posts = await getPosts()
-    const post = posts.find((p) => p.slug === params.slug)
-
-    if (!post) {
-      const error = new Error(`No published Notion post for slug "${params.slug}"`)
-      console.error(error)
-      rethrowIfBuild(error)
-      return withRevalidate({
-        post: null,
-        recordMap: null,
-      })
-    }
-
-    let recordMap = null
-    try {
-      recordMap = await getPage(post.id)
-    } catch (err) {
-      console.error(`Failed to fetch Notion page ${post.id} for slug ${params.slug}:`, err)
-      rethrowIfBuild(err)
-    }
-
-    if (!recordMap?.block) {
-      const error = new Error(`Notion page ${post.id} for slug "${params.slug}" returned no blocks`)
-      console.error(error)
-      rethrowIfBuild(error)
-    }
-
-    return withRevalidate({
-      post,
-      recordMap,
-    })
-  } catch (error) {
-    console.error('Failed to get posts:', error)
-    rethrowIfBuild(error)
-    return withRevalidate({
-      post: null,
-      recordMap: null,
-    })
-  }
+  // Fetch failures throw and keep the last good page. A slug that is absent
+  // from a successful post list is a real 404 (`notFound`), not an error.
+  return loadPostPageProps(params.slug, getPosts, (post) => getPage(post.id))
 }

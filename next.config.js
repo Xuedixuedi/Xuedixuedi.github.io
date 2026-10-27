@@ -14,6 +14,10 @@ let nextConfig = {
 if (isGithubActions) {
   nextConfig.output = 'export'
   nextConfig.images.unoptimized = true
+  // Pages are `.tsx`. `/api/revalidate` is `.ts` and cannot be exported:
+  // `output: 'export'` has no server to run API routes. Dropping `ts` from
+  // the page extensions leaves that file out of the static build.
+  nextConfig.pageExtensions = ['tsx']
 }
 
 module.exports = nextConfig
