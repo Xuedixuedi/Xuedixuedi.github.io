@@ -14,8 +14,8 @@
   "dependencies": {
     "date-fns": "^3.3.1",
     "katex": "0.18.4",
-    "mermaid": "^11.12.2",
-    "next": "^14.2.35",
+    "mermaid": "^11.17.2",
+    "next": "^16.4.3",
     "next-themes": "^0.4.6",
     "notion-client": "8.0.8",
     "notion-types": "8.0.8",
@@ -34,7 +34,7 @@
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35",
+    "postcss": "^8.5.23",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.20.6",
     "typescript": "^5.3.3"
