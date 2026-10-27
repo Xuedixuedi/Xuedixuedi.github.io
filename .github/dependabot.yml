@@ -41,6 +41,10 @@ updates:
       - dependency-name: react-dom
         update-types:
           - version-update:semver-major
+      # @types/node 20 -> 26 was rejected. Stay on the Node 20 types line.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: "/"
