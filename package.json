@@ -29,7 +29,7 @@
     "react-notion-x": "8.0.8"
   },
   "devDependencies": {
-    "@types/node": "^20.11.19",
+    "@types/node": "^26.6.5",
     "@types/prismjs": "^1.26.5",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
