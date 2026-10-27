@@ -68,10 +68,12 @@ describe("withRevalidate", () => {
   });
 
   it("rejects a non-positive or non-integer interval", () => {
-    withEnv({ REVALIDATE_SECONDS: "0" }, () => {
+    // GitHub Actions sets GITHUB_ACTIONS, which selects the static export and
+    // skips the interval. Clear it so this asserts the Vercel path.
+    withEnv({ GITHUB_ACTIONS: undefined, REVALIDATE_SECONDS: "0" }, () => {
       assert.throws(() => withRevalidate({ ok: true }), /REVALIDATE_SECONDS/);
     });
-    withEnv({ REVALIDATE_SECONDS: "1.5" }, () => {
+    withEnv({ GITHUB_ACTIONS: undefined, REVALIDATE_SECONDS: "1.5" }, () => {
       assert.throws(() => withRevalidate({ ok: true }), /REVALIDATE_SECONDS/);
     });
   });
