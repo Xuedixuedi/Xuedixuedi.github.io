@@ -9,7 +9,7 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Singapore
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     commit-message:
       # Existing history uses chore(deps): and chore(deps-dev):
       prefix: chore
@@ -53,7 +53,7 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Singapore
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     commit-message:
       prefix: chore
       include: scope
