@@ -1,23 +1,32 @@
-/** @type {import('next').NextConfig} */
-const isGithubActions = process.env.GITHUB_ACTIONS || false
+const { siteUrl } = require("./src/lib/site-url");
 
-let nextConfig = {
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
+  // Fold SITE_URL into the public value so server and browser metadata match.
+  env: {
+    NEXT_PUBLIC_SITE_URL: siteUrl(),
+  },
   images: {
-    domains: ['www.notion.so', 'lh5.googleusercontent.com', 's3-us-west-2.amazonaws.com'],
+    remotePatterns: [
+      { protocol: "https", hostname: "www.notion.so", pathname: "/**" },
+      { protocol: "https", hostname: "lh5.googleusercontent.com", pathname: "/**" },
+      { protocol: "https", hostname: "s3-us-west-2.amazonaws.com", pathname: "/**" },
+    ],
   },
   experimental: {
     largePageDataBytes: 512 * 1000, // 512KB
   },
-}
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
+};
 
-if (isGithubActions) {
-  nextConfig.output = 'export'
-  nextConfig.images.unoptimized = true
-  // Pages are `.tsx`. `/api/revalidate` is `.ts` and cannot be exported:
-  // `output: 'export'` has no server to run API routes. Dropping `ts` from
-  // the page extensions leaves that file out of the static build.
-  nextConfig.pageExtensions = ['tsx']
-}
-
-module.exports = nextConfig
+module.exports = nextConfig;

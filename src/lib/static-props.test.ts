@@ -68,8 +68,6 @@ describe("withRevalidate", () => {
   });
 
   it("rejects a non-positive or non-integer interval", () => {
-    // GitHub Actions sets GITHUB_ACTIONS, which selects the static export and
-    // skips the interval. Clear it so this asserts the Vercel path.
     withEnv({ GITHUB_ACTIONS: undefined, REVALIDATE_SECONDS: "0" }, () => {
       assert.throws(() => withRevalidate({ ok: true }), /REVALIDATE_SECONDS/);
     });
@@ -78,10 +76,11 @@ describe("withRevalidate", () => {
     });
   });
 
-  it("omits revalidate for the GitHub Pages static export", () => {
+  it("keeps ISR when GITHUB_ACTIONS is set", () => {
     withEnv({ GITHUB_ACTIONS: "true", REVALIDATE_SECONDS: "30" }, () => {
       assert.deepEqual(withRevalidate({ posts: [post] }), {
         props: { posts: [post] },
+        revalidate: 30,
       });
     });
   });
@@ -119,15 +118,12 @@ describe("home page props", () => {
 });
 
 describe("post page props", () => {
-  it("uses blocking fallback only for the Vercel build", () => {
-    withEnv({ GITHUB_ACTIONS: undefined }, () => {
+  it("uses blocking fallback even when GITHUB_ACTIONS is set", () => {
+    withEnv({ GITHUB_ACTIONS: "true" }, () => {
       assert.deepEqual(postStaticPaths([post]), {
         paths: [{ params: { slug: "hello" } }],
         fallback: "blocking",
       });
-    });
-    withEnv({ GITHUB_ACTIONS: "true" }, () => {
-      assert.equal(postStaticPaths([post]).fallback, false);
     });
   });
 
@@ -145,9 +141,10 @@ describe("post page props", () => {
         revalidate: 3600,
       });
     });
-    withEnv({ GITHUB_ACTIONS: "true" }, () => {
+    withEnv({ GITHUB_ACTIONS: "true", REVALIDATE_SECONDS: undefined }, () => {
       assert.deepEqual(postPageProps("missing", [post], null), {
         notFound: true,
+        revalidate: 3600,
       });
     });
   });

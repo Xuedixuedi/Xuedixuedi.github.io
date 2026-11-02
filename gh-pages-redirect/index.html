@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Xuedi's Blog</title>
+    <link rel="canonical" href="https://blog-xuedixuedi.vercel.app/" />
+    <meta http-equiv="refresh" content="0; url=https://blog-xuedixuedi.vercel.app/" />
+    <script>
+      // User-site only. GitHub routes project Pages (other repositories under
+      // this account) before this file is ever served.
+      (function () {
+        var origin = "https://blog-xuedixuedi.vercel.app";
+        var target = origin + location.pathname + location.search + location.hash;
+        var canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute("href", target);
+        location.replace(target);
+      })();
+    </script>
+  </head>
+  <body>
+    <p><a href="https://blog-xuedixuedi.vercel.app/">Continue to Xuedi's Blog</a></p>
+  </body>
+</html>

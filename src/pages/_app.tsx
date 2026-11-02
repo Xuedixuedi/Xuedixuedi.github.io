@@ -12,6 +12,8 @@ import 'rc-dropdown/assets/index.css'
 // used for rendering equations (optional)
 import 'katex/dist/katex.min.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 import type { AppProps } from 'next/app'
 
@@ -19,6 +21,8 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider>
       <Component {...pageProps} />
+      <Analytics />
+      <SpeedInsights />
     </ThemeProvider>
   )
 }

@@ -7,12 +7,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/lib/notion-record.test.ts src/lib/static-props.test.ts src/lib/revalidate.test.ts src/lib/next-config.test.ts",
+    "test": "node --import tsx --test src/lib/notion-record.test.ts src/lib/static-props.test.ts src/lib/revalidate.test.ts src/lib/next-config.test.ts src/lib/sitemap.test.ts src/lib/site-url.test.ts src/lib/gh-pages-redirect.test.ts",
     "smoke:notion": "tsx scripts/notion-smoke.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "date-fns": "^3.3.1",
     "katex": "0.19.1",
     "mermaid": "^11.17.2",

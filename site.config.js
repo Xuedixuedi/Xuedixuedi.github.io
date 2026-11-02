@@ -1,3 +1,5 @@
+const { siteUrl } = require("./src/lib/site-url");
+
 const CONFIG = {
   // 博客的基本信息
   profile: {
@@ -25,7 +27,7 @@ const CONFIG = {
   },
 
   // CONFIG configration (required)
-  link: "https://Xuedixuedi.github.io",
+  link: siteUrl(),
   since: 2023, // If leave this empty, current year will be used.
   lang: "zh-CN", // ['en-US', 'zh-CN', 'zh-HK', 'zh-TW', 'ja-JP', 'es-ES', 'ko-KR']
   ogImageGenerateURL: "https://og-image-korean.vercel.app", // The link to generate OG image, don't end with a slash
