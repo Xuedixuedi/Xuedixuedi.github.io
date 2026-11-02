@@ -70,6 +70,7 @@ gh-pages-redirect/             static redirect to the Vercel origin
 - Do not major-upgrade `next`, `react`, or `react-dom`. Dependabot already ignores those major version updates, plus `@types/node` majors.
 - Never commit secrets. `.env*.local` is gitignored. `REVALIDATE_SECRET` belongs on Vercel only.
 - CI must pass before merge.
+- When editing the README, update both `README.md` and `README.zh-CN.md` and keep them in sync.
 
 ## Verify
 

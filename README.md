@@ -1,33 +1,35 @@
+English | [简体中文](./README.zh-CN.md)
+
 # Xuedi's Blog
 
-用公开的 Notion 数据库做内容源，由 Next.js 在 Vercel 上以 ISR 渲染的个人博客。
+A personal blog that uses a public Notion database as its content source and is rendered with Next.js ISR on Vercel.
 
-线上站点：<https://blog-xuedixuedi.vercel.app>
+Live site: <https://blog-xuedixuedi.vercel.app>
 
 [![CI](https://github.com/Xuedixuedi/Xuedixuedi.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/Xuedixuedi/Xuedixuedi.github.io/actions/workflows/ci.yml)
 [![Vercel](https://img.shields.io/badge/Vercel-blog--xuedixuedi-000?logo=vercel)](https://blog-xuedixuedi.vercel.app)
 
-这个项目最初用 Trae 和 Gemini-3-Pro 以 vibe coding 搭出来，界面参考了 [morethan-log](https://github.com/morethanmin/morethan-log)。现在由 AI coding agents 继续维护，改动经过 GitHub Actions CI 后才合并。
+The project was first put together with Trae and Gemini-3-Pro through vibe coding. The interface follows [morethan-log](https://github.com/morethanmin/morethan-log). AI coding agents maintain it now, and changes are merged only after GitHub Actions CI passes.
 
-## 怎么工作
+## How it works
 
-Notion 数据库经 Notion API 生成页面。文章更新靠 Notion 自动化调用重新生成接口。拉取失败时 `getStaticProps` 抛错，Next.js 继续提供上一版页面，空白结果不会写入缓存。
+The Notion database is turned into pages through the Notion API. Post updates depend on a Notion automation that calls the revalidation endpoint. When a fetch fails, `getStaticProps` throws, Next.js keeps serving the previous page, and an empty result is never written into the cache.
 
 ```mermaid
 flowchart LR
-  DB["Notion 数据库"] --> API["Notion API"]
-  API --> ISR["Next.js ISR 页面"]
+  DB["Notion database"] --> API["Notion API"]
+  API --> ISR["Next.js ISR pages"]
   ISR --> Vercel["Vercel"]
-  Hook["Notion 自动化"] -->|"POST /api/revalidate?secret=..."| Rev["按需重新生成"]
+  Hook["Notion automation"] -->|"POST /api/revalidate?secret=..."| Rev["On-demand revalidation"]
   Rev --> ISR
-  Fail["Notion 出错"] --> Keep["保留上一版页面"]
+  Fail["Notion error"] --> Keep["Keep the previous page"]
 ```
 
-定时重新生成是兜底：`REVALIDATE_SECONDS` 默认 3600 秒。这次生成如果失败，同样抛错，已上线的页面保持不变。
+Scheduled revalidation is the fallback: `REVALIDATE_SECONDS` defaults to 3600 seconds. If that generation fails, it throws the same way, and the page already live stays unchanged.
 
-## 快速开始
+## Quick start
 
-命令都在仓库根目录执行。克隆后的文件夹是 `Xuedixuedi.github.io`。`npm run dev` 之前，在该目录创建 `.env.local`，至少写入 `NOTION_PAGE_ID`（见下表）。
+Run every command from the repository root. The folder after cloning is `Xuedixuedi.github.io`. Before `npm run dev`, create `.env.local` in that directory and set at least `NOTION_PAGE_ID` (see the table below).
 
 ```bash
 git clone https://github.com/Xuedixuedi/Xuedixuedi.github.io.git
@@ -36,74 +38,74 @@ npm install
 npm run dev
 ```
 
-开发服务器在 <http://localhost:3000>。数据库需要在 Notion 里开启 Share to web：`notion-client` 不带集成 token，只读公开页面。
+The dev server is at <http://localhost:3000>. The database must have Share to web turned on in Notion: `notion-client` carries no integration token and only reads public pages.
 
-## 环境变量
+## Environment variables
 
-| 变量 | 作用 | 必填 | 在哪设置 |
+| Variable | Purpose | Required | Where to set it |
 | --- | --- | --- | --- |
-| `NOTION_PAGE_ID` | Notion 数据库页面 ID，赋给 `site.config.js` 的 `notionConfig.pageId`。为空时构建直接抛错 | 本地和 Vercel 必填。CI 未设置时使用公开库 `f93701d92ba04185952511e3d047bb4d` | `.env.local`；Vercel Environment Variables。CI 读 Actions variable 或 secret |
-| `REVALIDATE_SECRET` | 校验 `POST /api/revalidate`。可放在 `?secret=`、请求头 `x-revalidate-secret`，或 `Authorization: Bearer`。未设置时接口返回 401 | 使用 Notion webhook 时必填 | 只放在 Vercel。不要写入仓库 |
-| `REVALIDATE_SECONDS` | ISR 间隔（秒），默认 `3600`，必须是正整数。sitemap 的 `s-maxage` 使用同一个值 | 否 | `.env.local` 或 Vercel |
-| `NEXT_PUBLIC_SITE_URL` | 规范站点地址，写入 canonical、Open Graph、Twitter 和 sitemap。未设置时看 `SITE_URL`，再没有则是 `https://blog-xuedixuedi.vercel.app` | 否 | `.env.local` 或 Vercel |
-| `SITE_URL` | 服务端别名，仅在 `NEXT_PUBLIC_SITE_URL` 未设置时生效。构建会把它折进 `NEXT_PUBLIC_SITE_URL`，避免浏览器和服务器各用一个地址 | 否 | `.env.local` 或 Vercel |
-| `NEXT_PUBLIC_GOOGLE_MEASUREMENT_ID` | `site.config.js` 里的 Analytics ID。`googleAnalytics.enable` 现为 `false`，页面未读取 | 否 | `.env.local` 或 Vercel |
-| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Search Console 验证码。`googleSearchConsole.enable` 现为 `false`，页面未读取 | 否 | `.env.local` 或 Vercel |
-| `VERCEL_ENV` | 等于 `production` 时 `CONFIG.isProd` 为 true。当前没有页面读取该字段 | 否，Vercel 自动注入 | Vercel |
+| `NOTION_PAGE_ID` | Notion database page ID, assigned to `notionConfig.pageId` in `site.config.js`. The build throws immediately when it is empty | Required locally and on Vercel. When CI leaves it unset, the public database `f93701d92ba04185952511e3d047bb4d` is used | `.env.local`; Vercel Environment Variables. CI reads an Actions variable or secret |
+| `REVALIDATE_SECRET` | Authenticates `POST /api/revalidate`. It may be sent as `?secret=`, the `x-revalidate-secret` header, or `Authorization: Bearer`. The endpoint returns 401 when it is unset | Required when using the Notion webhook | Vercel only. Do not commit it to the repository |
+| `REVALIDATE_SECONDS` | ISR interval in seconds. Defaults to `3600` and must be a positive integer. The sitemap `s-maxage` uses the same value | No | `.env.local` or Vercel |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL, written into canonical, Open Graph, Twitter, and the sitemap. When unset, `SITE_URL` is used, then `https://blog-xuedixuedi.vercel.app` | No | `.env.local` or Vercel |
+| `SITE_URL` | Server-side alias, used only when `NEXT_PUBLIC_SITE_URL` is unset. The build folds it into `NEXT_PUBLIC_SITE_URL` so the browser and the server do not each use a different address | No | `.env.local` or Vercel |
+| `NEXT_PUBLIC_GOOGLE_MEASUREMENT_ID` | Analytics ID in `site.config.js`. `googleAnalytics.enable` is currently `false`, and pages do not read it | No | `.env.local` or Vercel |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Search Console verification code. `googleSearchConsole.enable` is currently `false`, and pages do not read it | No | `.env.local` or Vercel |
+| `VERCEL_ENV` | `CONFIG.isProd` is true when this equals `production`. No page reads that field today | No; Vercel injects it automatically | Vercel |
 
-`.env*.local` 已在 `.gitignore` 中。
+`.env*.local` is listed in `.gitignore`.
 
-Page ID 是公开链接末尾的 32 位 ID，例如 `https://www.notion.so/Page-Title-1234567890abcdef1234567890abcdef` 中的 `1234567890abcdef1234567890abcdef`。
+The page ID is the 32-character ID at the end of a public link. In `https://www.notion.so/Page-Title-1234567890abcdef1234567890abcdef`, that ID is `1234567890abcdef1234567890abcdef`.
 
-## Notion 数据库属性
+## Notion database properties
 
-属性名按大小写匹配。一行要同时满足 `Type` 为 `Post`、`Status` 为 `Published` 才会出现在站点上。
+Property names are matched case-sensitively. A row appears on the site only when `Type` is `Post` and `Status` is `Published`.
 
-| 属性 | 类型 | 说明 |
+| Property | Type | Notes |
 | --- | --- | --- |
-| `Title` | Title | 标题。没有 `Title` 时依次尝试 `Name` 和 Notion 的 `title` |
-| `Slug` | Text | URL 路径，例如 `my-first-post`。留空时用页面 block id |
-| `Date` | Date | 发布日期。留空时用创建时间 |
-| `Tags` | Multi-select | 标签，可空 |
-| `Summary` | Text | 列表摘要，可空 |
-| `Thumbnail` | Files | 封面，可空。S3 链接会改写成 Notion 图片代理 |
-| `Type` | Select | 必须为 `Post`。留空或没有该属性时按 `Post` 处理 |
-| `Status` | Select | 必须为 `Published`。留空或没有该属性时按 `Published` 处理 |
+| `Title` | Title | Title. When `Title` is missing, `Name` is tried next, then Notion's `title` |
+| `Slug` | Text | URL path, for example `my-first-post`. When empty, the page block id is used |
+| `Date` | Date | Publish date. When empty, the created time is used |
+| `Tags` | Multi-select | Tags. May be empty |
+| `Summary` | Text | Excerpt shown in lists. May be empty |
+| `Thumbnail` | Files | Cover image. May be empty. S3 links are rewritten through the Notion image proxy |
+| `Type` | Select | Must be `Post`. An empty value, or a missing property, is treated as `Post` |
+| `Status` | Select | Must be `Published`. An empty value, or a missing property, is treated as `Published` |
 
-## 部署
+## Deployment
 
-**Vercel 是博客的唯一运行环境。** 把 GitHub 仓库导入 Vercel，设置 `NOTION_PAGE_ID` 和 `REVALIDATE_SECRET` 后部署。页面使用 ISR，`fallback` 为 `blocking`，`/api/revalidate` 可用。规范域名是 <https://blog-xuedixuedi.vercel.app>。`site.config.js` 的 `link` 读 `NEXT_PUBLIC_SITE_URL` 或 `SITE_URL`，默认就是这个地址。
+**Vercel is the only runtime for the blog.** Import the GitHub repository into Vercel, set `NOTION_PAGE_ID` and `REVALIDATE_SECRET`, then deploy. Pages use ISR, `fallback` is `blocking`, and `/api/revalidate` is available. The canonical domain is <https://blog-xuedixuedi.vercel.app>. `link` in `site.config.js` reads `NEXT_PUBLIC_SITE_URL` or `SITE_URL`, and that address is the default.
 
-**GitHub Pages 只做跳转。** 仓库名仍是 `Xuedixuedi.github.io`，所以 <https://xuedixuedi.github.io> 还会打开。[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) 不再构建博客，也没有每日定时任务。它只在推送到 `main` 且 `gh-pages-redirect/` 或该工作流有改动时，以及手动触发时，把 `gh-pages-redirect/index.html` 和 `404.html` 发布上去。浏览器用 `location.replace` 跳到 Vercel 上的同一路径（保留 pathname、search、hash）。不执行脚本时，meta refresh 和 canonical 回到站点根。
+**GitHub Pages only redirects.** The repository name is still `Xuedixuedi.github.io`, so <https://xuedixuedi.github.io> still opens. [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) no longer builds the blog, and it has no daily scheduled job. It publishes `gh-pages-redirect/index.html` and `404.html` only on a push to `main` that changes `gh-pages-redirect/` or that workflow, and when triggered manually. The browser uses `location.replace` to jump to the same path on Vercel (pathname, search, and hash are kept). When scripts do not run, meta refresh and the canonical link fall back to the site root.
 
-同一账号下的项目站点（例如 `/WishKit-LoveAndDeepspace/`）由各自仓库发布。GitHub 会先把这些路径交给对应仓库，本仓库的跳转页碰不到它们。
+Project sites under the same account (for example `/WishKit-LoveAndDeepspace/`) are published from their own repositories. GitHub hands those paths to the matching repository first, so this repository's redirect page never sees them.
 
-## 用 Notion 自动更新
+## Automatic updates from Notion
 
-1. 在 Vercel 设置 `REVALIDATE_SECRET`。
-2. 在 Notion 数据库上建 Automation：文章新增或属性变更时发送 Webhook。
-3. 请求方法用 **POST**，地址：
+1. Set `REVALIDATE_SECRET` on Vercel.
+2. Create an Automation on the Notion database: send a webhook when a post is added or its properties change.
+3. Use **POST**. The URL is:
 
    `https://blog-xuedixuedi.vercel.app/api/revalidate?secret=<REVALIDATE_SECRET>`
 
-   GET 会得到 405，缓存不动。密钥也可以放在 `x-revalidate-secret` 或 `Authorization: Bearer <REVALIDATE_SECRET>`。
-4. Notion 自动化的 body 形状不固定。body 里没有可用的 `slug` 或 `slugs` 时，重新生成首页和每一篇已发布文章。body 里带了 `slug`（字符串）或 `slugs`（字符串数组）时，只重新生成首页和这些路径。这些路径先等文章列表返回，再以最多 4 路并发执行（`Promise.allSettled`）。路由配置了 `maxDuration: 60`，避免在 Vercel 默认 10 秒限制下整站重新生成超时。
-5. 列出文章失败或没有已发布文章时，接口返回 500，不会调用重新生成。某一条路径生成失败时，整体也返回 500，响应里的 `results` 逐条标出成功或失败，`paths` 只包含成功的路径。失败的那一页不会覆盖已缓存的内容；同一请求里成功的路径会更新。
+   GET returns 405 and leaves the cache untouched. The secret may also be sent in `x-revalidate-secret` or `Authorization: Bearer <REVALIDATE_SECRET>`.
+4. A Notion automation body does not have a fixed shape. When the body has no usable `slug` or `slugs`, the home page and every published post are regenerated. When the body includes `slug` (a string) or `slugs` (an array of strings), only the home page and those paths are regenerated. Those paths wait until the post list returns, then run with at most 4 in flight (`Promise.allSettled`). The route sets `maxDuration: 60` so a full-site regeneration does not time out under Vercel's default 10-second limit.
+5. If listing posts fails, or there are no published posts, the endpoint returns 500 and does not call revalidation. If any single path fails to generate, the response is also 500. `results` marks each path as success or failure, and `paths` contains only the successful ones. A failed page does not overwrite content already in the cache; paths that succeed in the same request are updated.
 
-## 配置
+## Configuration
 
-站点文案和账号在 [`site.config.js`](site.config.js)：`profile`（名字、头像、简介、社交链接）、`blog`（标题、描述、主题）、`since`、`lang`、`link`（规范站点地址）、`notionConfig.pageId`，以及 Utterances 评论仓库。`notionConfig.pageId` 读取环境变量 `NOTION_PAGE_ID`。`link` 读取 `NEXT_PUBLIC_SITE_URL` 或 `SITE_URL`。
+Site copy and accounts live in [`site.config.js`](site.config.js): `profile` (name, avatar, bio, social links), `blog` (title, description, theme), `since`, `lang`, `link` (canonical site URL), `notionConfig.pageId`, and the Utterances comment repository. `notionConfig.pageId` reads the `NOTION_PAGE_ID` environment variable. `link` reads `NEXT_PUBLIC_SITE_URL` or `SITE_URL`.
 
-## CI 与 Dependabot
+## CI and Dependabot
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) 在 push、pull request、每天 UTC 02:00 和手动触发时运行，Node.js 22。常规检查是 `npm ci`、`npm run typecheck`、`npm test`、`npm run smoke:notion`，以及一次 `npm run build`（与 Vercel 相同的 ISR）。定时任务只跑 Notion smoke，用来发现 Notion API 变化。合并前 CI 需要通过。
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on push, pull request, every day at 02:00 UTC, and manual dispatch, on Node.js 22. The regular checks are `npm ci`, `npm run typecheck`, `npm test`, `npm run smoke:notion`, and one `npm run build` (the same ISR build as Vercel). The scheduled job runs only the Notion smoke check, to catch changes in the Notion API. CI must pass before merge.
 
-Dependabot（[`.github/dependabot.yml`](.github/dependabot.yml)）每周一 09:00（Asia/Singapore）检查 npm 和 GitHub Actions。`open-pull-requests-limit: 0` 关掉常规版本更新 PR，安全更新仍会打开。`next`、`react`、`react-dom`、`@types/node` 的 major 版本更新被忽略。
+Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) checks npm and GitHub Actions every Monday at 09:00 (Asia/Singapore). `open-pull-requests-limit: 0` turns off routine version-update pull requests; security updates still open. Major updates of `next`, `react`, `react-dom`, and `@types/node` are ignored.
 
-## 致谢
+## Acknowledgements
 
-视觉和功能参考 [morethan-log](https://github.com/morethanmin/morethan-log)。
+Visual design and features follow [morethan-log](https://github.com/morethanmin/morethan-log).
 
-## 许可证
+## License
 
-[MIT](LICENSE)。Copyright (c) 2026 Xuedi Liu。
+[MIT](LICENSE). Copyright (c) 2026 Xuedi Liu.
