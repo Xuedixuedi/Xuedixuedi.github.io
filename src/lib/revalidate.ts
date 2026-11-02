@@ -155,21 +155,77 @@ export async function readRequestBody(
   }
 }
 
+/**
+ * Notion webhooks regenerate the homepage and every published post. Each
+ * path fetches Notion (about 1–2.5s). A small cap keeps that burst bounded
+ * if the database grows; `maxDuration` on the route covers the rest.
+ */
+export const REVALIDATE_CONCURRENCY = 4;
+
+export type PathRevalidateResult = {
+  path: string;
+  ok: boolean;
+  error?: string;
+};
+
 export type RevalidateResult = {
   status: number;
   body: {
     message?: string;
     revalidated?: boolean;
     paths?: string[];
+    results?: PathRevalidateResult[];
   };
 };
 
+function errorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  return "Error revalidating";
+}
+
+/**
+ * Regenerate paths in batches. `Promise.allSettled` keeps going when one
+ * path fails. A failure does not roll back paths that already succeeded, and
+ * it does not replace the failed path: `res.revalidate` updates a page only
+ * when `getStaticProps` succeeds.
+ */
+export async function revalidateAll(
+  paths: readonly string[],
+  revalidate: (path: string) => Promise<void>,
+  concurrency = REVALIDATE_CONCURRENCY,
+): Promise<PathRevalidateResult[]> {
+  if (paths.length === 0) return [];
+  const limit = Math.max(1, Math.min(concurrency, paths.length));
+  const results: PathRevalidateResult[] = new Array(paths.length);
+
+  for (let start = 0; start < paths.length; start += limit) {
+    const end = Math.min(paths.length, start + limit);
+    const batch = paths.slice(start, end);
+    const settled = await Promise.allSettled(batch.map((path) => revalidate(path)));
+    settled.forEach((outcome, offset) => {
+      const path = batch[offset];
+      if (outcome.status === "fulfilled") {
+        results[start + offset] = { path, ok: true };
+        return;
+      }
+      console.error(`On-demand revalidation failed for ${path}:`, outcome.reason);
+      results[start + offset] = {
+        path,
+        ok: false,
+        error: errorMessage(outcome.reason),
+      };
+    });
+  }
+
+  return results;
+}
+
 /**
  * Revalidate `/` and either the requested slugs or every published slug.
- * Listing posts happens before any `revalidate` call. A thrown fetch, an
- * empty database, or a failed `revalidate` becomes a non-200 result and does
- * not replace a cached page: `res.revalidate` only updates a path when
- * `getStaticProps` succeeds, and that function throws on Notion failures.
+ * Listing posts happens before any `revalidate` call. A thrown fetch or an
+ * empty database returns 500 and does not touch the cache. Paths then run
+ * concurrently. Any failed path returns 500 for the request; that path keeps
+ * its previous page, and the response lists each path's success or failure.
  */
 export async function runRevalidation(options: {
   method: string | undefined;
@@ -193,18 +249,21 @@ export async function runRevalidation(options: {
     }
 
     const paths = revalidatePaths(slugs);
-    const revalidated: string[] = [];
-    for (const path of paths) {
-      try {
-        await options.revalidate(path);
-      } catch (error) {
-        console.error(`On-demand revalidation failed for ${path}:`, error);
-        return { status: 500, body: { message: "Error revalidating" } };
-      }
-      revalidated.push(path);
+    const results = await revalidateAll(paths, options.revalidate);
+    const succeeded = results.filter((item) => item.ok).map((item) => item.path);
+    if (results.some((item) => !item.ok)) {
+      return {
+        status: 500,
+        body: {
+          message: "Error revalidating",
+          revalidated: false,
+          paths: succeeded,
+          results,
+        },
+      };
     }
 
-    return { status: 200, body: { revalidated: true, paths: revalidated } };
+    return { status: 200, body: { revalidated: true, paths: succeeded, results } };
   } catch (error) {
     if (error instanceof RevalidateRejected) {
       return { status: error.status, body: { message: error.message } };

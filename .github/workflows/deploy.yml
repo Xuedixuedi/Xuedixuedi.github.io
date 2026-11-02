@@ -1,11 +1,17 @@
-name: Deploy to GitHub Pages
+# Publishes a tiny redirect from the user site (xuedixuedi.github.io) to Vercel.
+# This does not build the blog. Project Pages under the same account, such as
+# /WishKit-LoveAndDeepspace/, are separate repositories. GitHub routes those
+# paths to their own sites; this artifact is only index.html and 404.html.
+
+name: Deploy GitHub Pages redirect
 
 on:
   push:
     branches: ["main"]
+    paths:
+      - "gh-pages-redirect/**"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *' # 每天 UTC 0 点（北京时间 8 点）自动构建一次，可根据需要调整频率
 
 permissions:
   contents: read
@@ -22,43 +28,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Detect package manager
-        id: detect-package-manager
-        run: |
-          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
-            echo "manager=yarn" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=yarn" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ -f "${{ github.workspace }}/package.json" ]; then
-            echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "Unable to determine package manager"
-            exit 1
-          fi
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: "22"
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
-        with:
-          static_site_generator: next
-      - name: Install dependencies
-        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-      - name: Build with Next.js
-        run: ${{ steps.detect-package-manager.outputs.runner }} next build
-        env:
-          # Optional. Falls back to the public lxd-blog database when the secret is unset.
-          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID || 'f93701d92ba04185952511e3d047bb4d' }}
-      - name: Upload artifact
+
+      - name: Upload redirect site
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ./out
+          path: ./gh-pages-redirect
 
   deploy:
     environment:

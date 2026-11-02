@@ -6,7 +6,7 @@ import { PostList } from '@/components/PostList'
 import { ProfileCard } from '@/components/ProfileCard'
 import { TagList } from '@/components/TagList'
 import { SearchInput } from '@/components/SearchInput'
-import Head from 'next/head'
+import { Seo } from '@/components/Seo'
 import { CONFIG } from '../../site.config'
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
@@ -47,10 +47,7 @@ export default function Home({ posts, tags }: { posts: any[], tags: Record<strin
 
   return (
     <div className="min-h-screen flex flex-col bg-day-50 dark:bg-zinc-900 text-gray-900 dark:text-gray-100">
-      <Head>
-        <title>{CONFIG.blog.title}</title>
-        <meta name="description" content={CONFIG.blog.description} />
-      </Head>
+      <Seo title={CONFIG.blog.title} description={CONFIG.blog.description} path="/" />
       <Header />
       
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8">

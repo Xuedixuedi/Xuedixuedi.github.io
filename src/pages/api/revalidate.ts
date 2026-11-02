@@ -12,6 +12,9 @@ export const config = {
   api: {
     bodyParser: false,
   },
+  // A slug-less Notion webhook regenerates every post. The platform default
+  // is 10s and was returning 504. Paths also run concurrently.
+  maxDuration: 60,
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

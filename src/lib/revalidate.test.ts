@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { readFileSync } from "node:fs";
 import {
+  REVALIDATE_CONCURRENCY,
   explicitSlugsFromBody,
   providedSecrets,
   readRequestBody,
@@ -137,7 +139,7 @@ describe("revalidate failures", () => {
     assert.deepEqual(calls, []);
   });
 
-  it("returns 500 when revalidate throws and does not continue", async () => {
+  it("returns 500 when a path fails, still regenerates the others, and reports each path", async () => {
     const calls: string[] = [];
     const { run } = authorized({
       revalidate: async (path: string) => {
@@ -147,7 +149,67 @@ describe("revalidate failures", () => {
     });
     const result = await run();
     assert.equal(result.status, 500);
-    assert.deepEqual(calls, ["/", "/alpha"]);
+    assert.equal(result.body.revalidated, false);
+    assert.equal(result.body.message, "Error revalidating");
+    assert.deepEqual(result.body.paths, ["/", "/beta"]);
+    assert.deepEqual(result.body.results, [
+      { path: "/", ok: true },
+      { path: "/alpha", ok: false, error: "getStaticProps failed" },
+      { path: "/beta", ok: true },
+    ]);
+    assert.deepEqual(calls, ["/", "/alpha", "/beta"]);
+  });
+
+  it("lists posts before starting any revalidate", async () => {
+    let listed = false;
+    let startedEarly = false;
+    const { run } = authorized({
+      listPublishedSlugs: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 15));
+        listed = true;
+        return ["alpha"];
+      },
+      revalidate: async () => {
+        if (!listed) startedEarly = true;
+      },
+    });
+    const result = await run();
+    assert.equal(result.status, 200);
+    assert.equal(startedEarly, false);
+    assert.deepEqual(
+      result.body.results,
+      [
+        { path: "/", ok: true },
+        { path: "/alpha", ok: true },
+      ],
+    );
+  });
+
+  it("revalidates at most REVALIDATE_CONCURRENCY paths at once", async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const slugs = ["a", "b", "c", "d", "e"];
+    const { run } = authorized({
+      body: { slugs },
+      revalidate: async () => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        inFlight -= 1;
+      },
+    });
+    const result = await run();
+    assert.equal(result.status, 200);
+    assert.equal(result.body.results?.length, slugs.length + 1);
+    assert.equal(result.body.results?.every((item) => item.ok), true);
+    assert.ok(maxInFlight > 1);
+    assert.ok(maxInFlight <= REVALIDATE_CONCURRENCY);
+  });
+
+  it("sets maxDuration to 60 and keeps the raw body parser", () => {
+    const source = readFileSync(new URL("../pages/api/revalidate.ts", import.meta.url), "utf8");
+    assert.match(source, /maxDuration:\s*60/);
+    assert.match(source, /bodyParser:\s*false/);
   });
 });
 

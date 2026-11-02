@@ -1,8 +1,6 @@
 /**
  * Time-based ISR is only a safety net for a missed webhook. Prompt updates
- * go through `/api/revalidate`. GitHub Pages builds with `output: 'export'`,
- * which rejects `revalidate` and non-false `fallback`, so that path stays a
- * pure static export.
+ * go through `/api/revalidate`.
  *
  * A failed Notion fetch must throw. Next.js keeps the last successfully
  * generated page only when `getStaticProps` throws; a successful empty
@@ -12,10 +10,6 @@
 export const DEFAULT_REVALIDATE_SECONDS = 3600;
 
 const REVALIDATE_SECONDS_ENV = "REVALIDATE_SECONDS";
-
-export function isStaticExport(): boolean {
-  return Boolean(process.env.GITHUB_ACTIONS);
-}
 
 export function revalidateSeconds(): number {
   const raw = process.env[REVALIDATE_SECONDS_ENV];
@@ -31,19 +25,10 @@ export function revalidateSeconds(): number {
 }
 
 export function withRevalidate<P extends Record<string, unknown>>(props: P) {
-  if (isStaticExport()) return { props };
   return { props, revalidate: revalidateSeconds() };
 }
 
-/** Static export cannot serve fallback paths. Vercel generates them on demand. */
-export function staticPathsFallback(): false | "blocking" {
-  return isStaticExport() ? false : "blocking";
-}
-
-export function notFoundResult():
-  | { notFound: true }
-  | { notFound: true; revalidate: number } {
-  if (isStaticExport()) return { notFound: true };
+export function notFoundResult(): { notFound: true; revalidate: number } {
   return { notFound: true, revalidate: revalidateSeconds() };
 }
 
@@ -93,7 +78,7 @@ export function postStaticPaths<TPost extends SluggedPost>(posts: readonly TPost
   assertPublishedPosts(posts);
   return {
     paths: posts.map((post) => ({ params: { slug: post.slug } })),
-    fallback: staticPathsFallback(),
+    fallback: "blocking" as const,
   };
 }
 

@@ -5,7 +5,8 @@ import { loadPostPageProps, loadPostStaticPaths } from '@/lib/static-props'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import Comments from '@/components/Comments'
-import Head from 'next/head'
+import { Seo } from '@/components/Seo'
+import { postPath } from '@/lib/site-url'
 import { useRouter } from 'next/router'
 import { useTheme } from 'next-themes'
 import { format } from 'date-fns'
@@ -55,9 +56,13 @@ export default function Post({ recordMap, post }: { recordMap: any, post: any })
 
   return (
     <div className="min-h-screen flex flex-col bg-day-50 dark:bg-zinc-900 transition-colors duration-300">
-       <Head>
-        <title>{post?.title || 'Post'}</title>
-      </Head>
+      <Seo
+        title={post?.title || 'Post'}
+        description={post?.summary}
+        path={post?.slug ? postPath(post.slug) : '/'}
+        type="article"
+        image={post?.thumbnail}
+      />
       <Header />
       <main className="flex-grow w-full max-w-5xl mx-auto px-4 py-8">
         <div className="bg-white dark:bg-zinc-800 rounded-3xl shadow-sm p-8 md:p-16 transition-colors duration-300">
@@ -119,8 +124,7 @@ export default function Post({ recordMap, post }: { recordMap: any, post: any })
 }
 
 export async function getStaticPaths() {
-  // `fallback: 'blocking'` on Vercel so a post added after the build is
-  // rendered on first visit. Static export cannot use fallback.
+  // `fallback: 'blocking'` so a post added after the build renders on first visit.
   return loadPostStaticPaths(getPosts)
 }
 
